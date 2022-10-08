@@ -23,21 +23,25 @@ var migrateCmd = &cobra.Command{
 
         fmt.Println("\nSource: ", source)
         fmt.Println("Destination: ", destination)
-        fmt.Println("Collections: ", collections)
+        // only if collections is specified
+        if collections != "" {
+                fmt.Println("Collections: ", collections)
+        }  
         fmt.Println("Database Source: ", databaseSource)
         fmt.Println("Database Destination: ", databaseDestination)
 
         if collections != "" {
                 res := migrator.MigrateCollections(source, destination, databaseSource, databaseDestination, coll)
                 if res {
-                        fmt.Println("Migration has been successful!")
+                        fmt.Println("Selective collection copy has been successful!")
                 }
                 return nil
         }
 
-        // MigrateAll is WIP
-        res := migrator.MigrateAll(source, destination)
-        fmt.Println(res)
+        res := migrator.MigrateAll(source, destination, databaseSource, databaseDestination)
+        if res {
+                fmt.Println("Database copy is successful")
+        }
         return nil
     },
 }

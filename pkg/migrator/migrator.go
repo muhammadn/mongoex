@@ -16,27 +16,77 @@ import (
     "github.com/schollz/progressbar/v3"
 )
 
-// MigrateAll is just a dummy connect and disconnect, 
-// does not do anything else but just returns true if successful
-func MigrateAll(source string, destination string) bool {
+// migrate all is per database basis
+func MigrateAll(source string, destination string, databaseSource string, databaseDestination string) bool {
         ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
         defer cancel()
-        from_host, err := mongo.Connect(ctx, options.Client().ApplyURI(source))
-        to_host, err := mongo.Connect(ctx, options.Client().ApplyURI(destination))
+        source_client, err := mongo.Connect(ctx, options.Client().ApplyURI(source))
+        destination_client, err := mongo.Connect(ctx, options.Client().ApplyURI(destination))
 
         defer func() {
-            if err = from_host.Disconnect(ctx); err != nil {
+            if err = source_client.Disconnect(ctx); err != nil {
                 fmt.Println(err)
             }
 
-            if err = to_host.Disconnect(ctx); err != nil {
+            if err = destination_client.Disconnect(ctx); err != nil {
                 fmt.Println(err)
             }
         }() 
+ 
+        source_database := source_client.Database(databaseSource)
+        source_collections, err := source_database.ListCollectionNames(
+                context.TODO(),
+                bson.D{},
+        )
+        if err != nil {
+                log.Panic(err)
+        }
+
+        var total_estimate int64
+        for i := 0; i < len(source_collections); i++ {
+                source_collection_estimate, err := source_client.Database(databaseSource).Collection(source_collections[i]).EstimatedDocumentCount(context.Background())
+                if err != nil {
+                        log.Panic(err)
+                }
+
+                total_estimate = source_collection_estimate + total_estimate
+        }
+
+        fmt.Println("Estimated Documents: ", total_estimate)
+        bar := progressbar.Default(total_estimate, "Copying Documents")
+
+        for i := 0; i < len(source_collections); i++ {
+                var results []bson.D
+ 
+                source_collection := source_database.Collection(source_collections[i])
+                cursor, err := source_collection.Find(context.TODO(), bson.D{})
+                if err != nil {
+                        log.Panic(err)
+                }
+
+                destination_collection := destination_client.Database(databaseDestination).Collection(source_collections[i])
+                if err = cursor.All(context.TODO(), &results); err != nil {
+                        log.Panic(err)
+                }
+
+                for _, result := range results {
+                        //inserts, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
+                        _, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
+                        if err != nil {
+                                log.Panic(err)
+                        }
+
+                        bar.Add(1)
+                        //fmt.Println(inserts)
+                }
+
+                GetSetIndexes(source_collection, destination_collection)
+        }
 
         return true
 }
 
+// migrate collections is per database and selective collections only
 func MigrateCollections(source string, destination string, databaseSource string, databaseDestination string, collections []string) bool {
         ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
         defer cancel()
