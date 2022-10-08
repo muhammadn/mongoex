@@ -81,7 +81,7 @@ func MigrateAll(source string, destination string, databaseSource string, databa
                 }
 
                 GetSetIndexes(source_collection, destination_collection)
-                fmt.Println(fmt.Sprintf("Finish copying %s collection", source_collection))
+                fmt.Println(fmt.Sprintf("Finish copying %s collection", source_collections[i]))
         }
 
         return true
@@ -135,7 +135,7 @@ func MigrateCollections(source string, destination string, databaseSource string
                 }
 
                 GetSetIndexes(source_collection, destination_collection)
-		fmt.Println(fmt.Sprintf("Finish copying %s collection", source_collection))
+		fmt.Println(fmt.Sprintf("Finish copying %s collection", collections[i]))
         }
 
         defer func() {
