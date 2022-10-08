@@ -13,6 +13,7 @@ import (
     _ "go.mongodb.org/mongo-driver/mongo/readpref"
     "fmt"
     "reflect"
+    "github.com/schollz/progressbar/v3"
 )
 
 // MigrateAll is just a dummy connect and disconnect, 
@@ -42,6 +43,19 @@ func MigrateCollections(source string, destination string, databaseSource string
         source_client, err := mongo.Connect(ctx, options.Client().ApplyURI(source))
         destination_client, err := mongo.Connect(ctx, options.Client().ApplyURI(destination))
 
+        var total_estimate int64
+        for i := 0; i < len(collections); i++ {
+                source_collection_estimate, err := source_client.Database(databaseSource).Collection(collections[i]).EstimatedDocumentCount(context.Background())
+                if err != nil {
+                        log.Panic(err)
+                }
+
+                total_estimate = source_collection_estimate + total_estimate
+                fmt.Println("Estimated Documents: ", total_estimate)
+        }
+
+	bar := progressbar.Default(total_estimate, "Copying Documents")
+
         for i := 0; i < len(collections); i++ {
                 var results []bson.D
 
@@ -59,11 +73,14 @@ func MigrateCollections(source string, destination string, databaseSource string
                 }
 
                 for _, result := range results {
-                        inserts, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
+                        //inserts, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
+                        _, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
                         if err != nil {
                                 log.Panic(err)
                         }
-     	                fmt.Println(inserts)
+
+                        bar.Add(1)
+     	                //fmt.Println(inserts)
                 }
 
                 GetSetIndexes(source_collection, destination_collection)
