@@ -44,11 +44,19 @@ var pointInTimeCmd = &cobra.Command{
 
 func init() {
         tempClusterCmd.AddCommand(pointInTimeCmd)
-        pointInTimeCmd.PersistentFlags().StringP("proj", "p", "", "MongoDB Project Name")
-        pointInTimeCmd.PersistentFlags().StringP("diskSize", "d", "", "Cluster disk size for target temporary cluster")
-        pointInTimeCmd.PersistentFlags().StringP("tier", "t", "", "Tier for temporary cluster")
-        pointInTimeCmd.PersistentFlags().StringP("clusterName", "c", "", "Name for temporary cluster")
-        pointInTimeCmd.PersistentFlags().StringP("pubkey", "", "", "Public MongoDB API Key")
-        pointInTimeCmd.PersistentFlags().StringP("privkey", "", "", "Private MongoDB API Key")
-	pointInTimeCmd.PersistentFlags().StringP("time", "", "", "Point-in-time since epoch")
+        pointInTimeCmd.Flags().StringP("proj", "p", "", "MongoDB Project Name")
+        pointInTimeCmd.Flags().StringP("diskSize", "d", "", "Cluster disk size for target temporary cluster")
+        pointInTimeCmd.Flags().StringP("tier", "t", "", "Tier for temporary cluster")
+        pointInTimeCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
+        pointInTimeCmd.Flags().StringP("pubkey", "", "", "Public MongoDB API Key")
+        pointInTimeCmd.Flags().StringP("privkey", "", "", "Private MongoDB API Key")
+	pointInTimeCmd.Flags().StringP("time", "", "", "Point-in-time since epoch")
+
+        pointInTimeCmd.MarkFlagRequired("proj")
+        pointInTimeCmd.MarkFlagRequired("diskSize")
+        pointInTimeCmd.MarkFlagRequired("tier")
+        pointInTimeCmd.MarkFlagRequired("clusterName")
+        pointInTimeCmd.MarkFlagRequired("time")
+        pointInTimeCmd.MarkFlagRequired("pubkey")
+        pointInTimeCmd.MarkFlagRequired("privkey")
 }
