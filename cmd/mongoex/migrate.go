@@ -31,14 +31,24 @@ var migrateCmd = &cobra.Command{
         fmt.Println("Database Destination: ", databaseDestination)
 
         if collections != "" {
-                res := migrator.MigrateCollections(source, destination, databaseSource, databaseDestination, coll)
+                res, err := migrator.MigrateCollections(source, destination, databaseSource, databaseDestination, coll)
+		if err != nil {
+                        fmt.Println(err)
+			return err
+		}
+
                 if res {
                         fmt.Println("Selective collection copy has been successful!")
                 }
                 return nil
         }
 
-        res := migrator.MigrateAll(source, destination, databaseSource, databaseDestination)
+        res, err := migrator.MigrateAll(source, destination, databaseSource, databaseDestination)
+	if err != nil {
+                fmt.Println(err)
+		return err
+	}
+
         if res {
                 fmt.Println("Database copy is successful")
         }

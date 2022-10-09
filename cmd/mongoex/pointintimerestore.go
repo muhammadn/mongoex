@@ -21,6 +21,8 @@ var pointInTimeCmd = &cobra.Command{
 	pubkey, _                    := cmd.Flags().GetString("pubkey")
 	privkey, _                   := cmd.Flags().GetString("privkey")
 	pointInTimeSeconds, _        := cmd.Flags().GetString("time")
+	sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
+	targetProjectID, _           := cmd.Flags().GetString("targetProject")
         //atlas.AccessTest()
 	// convert diskSize from string to float which is required
 	diskSizef, err := strconv.ParseFloat(diskSize, 1)
@@ -37,7 +39,7 @@ var pointInTimeCmd = &cobra.Command{
                         panic(err)
                 }
 	}
-	atlas.PointInTimeRestore(projectName, diskSizef, tier, clusterName, pubkey, privkey, timeSeconds)
+	atlas.PointInTimeRestore(projectName, diskSizef, tier, clusterName, pubkey, privkey, timeSeconds, sourceClusterName, targetProjectID)
         return nil
     },
 }
@@ -48,6 +50,8 @@ func init() {
         pointInTimeCmd.Flags().StringP("diskSize", "d", "", "Cluster disk size for target temporary cluster")
         pointInTimeCmd.Flags().StringP("tier", "t", "", "Tier for temporary cluster")
         pointInTimeCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
+        pointInTimeCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
+        pointInTimeCmd.Flags().StringP("targetProject", "", "", "Target Project ID")
         pointInTimeCmd.Flags().StringP("pubkey", "", "", "Public MongoDB API Key")
         pointInTimeCmd.Flags().StringP("privkey", "", "", "Private MongoDB API Key")
 	pointInTimeCmd.Flags().StringP("time", "", "", "Point-in-time since epoch")
@@ -59,4 +63,6 @@ func init() {
         pointInTimeCmd.MarkFlagRequired("time")
         pointInTimeCmd.MarkFlagRequired("pubkey")
         pointInTimeCmd.MarkFlagRequired("privkey")
+        pointInTimeCmd.MarkFlagRequired("sourceClusterName")
+        pointInTimeCmd.MarkFlagRequired("targetProject")
 }
