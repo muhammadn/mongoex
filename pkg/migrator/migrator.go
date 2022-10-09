@@ -143,8 +143,9 @@ func MigrateCollections(source string, destination string, databaseSource string
                         bar.Add(1)
      	                //fmt.Println(inserts)
                 }
-
-                GetSetIndexes(source_collection, destination_collection)
+ 
+		// Disable index copying for now
+                //GetSetIndexes(source_collection, destination_collection)
 		fmt.Println(fmt.Sprintf("Finish copying %s collection", collections[i]))
         }
 
