@@ -37,10 +37,10 @@ var migrateCmd = &cobra.Command{
 			return err
 		}
 
-                if res {
-                        fmt.Println("Selective collection copy has been successful!")
-                }
-                return nil
+		if res {
+                    fmt.Println("Selective collection copy has been successful!")
+                    return nil
+		} 
         }
 
         res, err := migrator.MigrateAll(source, destination, databaseSource, databaseDestination)
