@@ -19,6 +19,7 @@ var automatedRestoreCmd = &cobra.Command{
 	clusterName, _               := cmd.Flags().GetString("clusterName")
 	pubkey, _                    := cmd.Flags().GetString("pubkey")
 	privkey, _                   := cmd.Flags().GetString("privkey")
+
         //atlas.AccessTest()
 	// convert diskSize from string to float which is required
 	diskSizef, err := strconv.ParseFloat(diskSize, 1)
@@ -33,10 +34,17 @@ var automatedRestoreCmd = &cobra.Command{
 
 func init() {
         tempClusterCmd.AddCommand(automatedRestoreCmd)
-        automatedRestoreCmd.PersistentFlags().StringP("proj", "p", "", "MongoDB Project Name")
-        automatedRestoreCmd.PersistentFlags().StringP("diskSize", "d", "", "Cluster disk size for target temporary cluster")
-        automatedRestoreCmd.PersistentFlags().StringP("tier", "t", "", "Tier for temporary cluster")
-        automatedRestoreCmd.PersistentFlags().StringP("clusterName", "c", "", "Name for temporary cluster")
-        automatedRestoreCmd.PersistentFlags().StringP("pubkey", "", "", "Public MongoDB API Key")
-        automatedRestoreCmd.PersistentFlags().StringP("privkey", "", "", "Private MongoDB API Key")
+        automatedRestoreCmd.Flags().StringP("proj", "p", "", "MongoDB Project Name")
+        automatedRestoreCmd.Flags().StringP("diskSize", "d", "", "Cluster disk size for target temporary cluster")
+        automatedRestoreCmd.Flags().StringP("tier", "t", "", "Tier for temporary cluster")
+        automatedRestoreCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
+        automatedRestoreCmd.Flags().StringP("pubkey", "", "", "Public MongoDB API Key")
+        automatedRestoreCmd.Flags().StringP("privkey", "", "", "Private MongoDB API Key")
+
+        automatedRestoreCmd.MarkFlagRequired("proj")
+        automatedRestoreCmd.MarkFlagRequired("diskSize")
+        automatedRestoreCmd.MarkFlagRequired("tier")
+        automatedRestoreCmd.MarkFlagRequired("clusterName")
+        automatedRestoreCmd.MarkFlagRequired("pubkey")
+        automatedRestoreCmd.MarkFlagRequired("privkey")
 }

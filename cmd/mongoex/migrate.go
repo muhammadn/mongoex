@@ -48,9 +48,12 @@ var migrateCmd = &cobra.Command{
 
 func init() {
         rootCmd.AddCommand(migrateCmd)
-        migrateCmd.PersistentFlags().StringP("source", "s", "mongodb://localhost:27017", "Source MongoDB Host. Example: (\"mongodb://username:password@localhost:27017\")")
-        migrateCmd.PersistentFlags().StringP("destination", "d", "mongodb://localhost:27017", "Destination MongoDB Host: Example: (\"mongodb://username:password@localhost:27017\")")
-        migrateCmd.PersistentFlags().StringP("dbsrc", "", "", "Source Database (optional), else will migrate all if this is omitted")
-        migrateCmd.PersistentFlags().StringP("dbdest", "", "", "Destination Database (optional), else will migrate all if this is omitted")
-        migrateCmd.PersistentFlags().StringP("collections", "c", "", "List of collections (optional), else will migrate all if this is omitted")
+        migrateCmd.Flags().StringP("source", "s", "mongodb://localhost:27017", "Source MongoDB Host. Example: (\"mongodb://username:password@localhost:27017\")")
+        migrateCmd.Flags().StringP("destination", "d", "mongodb://localhost:27017", "Destination MongoDB Host: Example: (\"mongodb://username:password@localhost:27017\")")
+        migrateCmd.Flags().StringP("dbsrc", "", "", "Source Database (optional), else will migrate all if this is omitted")
+        migrateCmd.Flags().StringP("dbdest", "", "", "Destination Database (optional), else will migrate all if this is omitted")
+        migrateCmd.Flags().StringP("collections", "c", "", "List of collections (optional), else will migrate all if this is omitted")
+
+	migrateCmd.MarkFlagRequired("dbsrc")
+	migrateCmd.MarkFlagRequired("dbdest")
 }
