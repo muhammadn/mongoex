@@ -19,6 +19,8 @@ var automatedRestoreCmd = &cobra.Command{
 	clusterName, _               := cmd.Flags().GetString("clusterName")
 	pubkey, _                    := cmd.Flags().GetString("pubkey")
 	privkey, _                   := cmd.Flags().GetString("privkey")
+        sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
+        targetProjectID, _           := cmd.Flags().GetString("targetProject")
 
         //atlas.AccessTest()
 	// convert diskSize from string to float which is required
@@ -27,7 +29,7 @@ var automatedRestoreCmd = &cobra.Command{
                 panic(err)
 	}
 
-	atlas.AutomatedRestore(projectName, diskSizef, tier, clusterName, pubkey, privkey)
+	atlas.AutomatedRestore(projectName, diskSizef, tier, clusterName, pubkey, privkey, sourceClusterName, targetProjectID)
         return nil
     },
 }
@@ -40,6 +42,8 @@ func init() {
         automatedRestoreCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
         automatedRestoreCmd.Flags().StringP("pubkey", "", "", "Public MongoDB API Key")
         automatedRestoreCmd.Flags().StringP("privkey", "", "", "Private MongoDB API Key")
+        automatedRestoreCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
+	automatedRestoreCmd.Flags().StringP("targetProject", "", "", "Target Project ID")
 
         automatedRestoreCmd.MarkFlagRequired("proj")
         automatedRestoreCmd.MarkFlagRequired("diskSize")
@@ -47,4 +51,6 @@ func init() {
         automatedRestoreCmd.MarkFlagRequired("clusterName")
         automatedRestoreCmd.MarkFlagRequired("pubkey")
         automatedRestoreCmd.MarkFlagRequired("privkey")
+        automatedRestoreCmd.MarkFlagRequired("sourceClusterName")
+        automatedRestoreCmd.MarkFlagRequired("targetProject")
 }

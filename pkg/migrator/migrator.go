@@ -17,7 +17,7 @@ import (
 )
 
 // migrate all is per database basis
-func MigrateAll(source string, destination string, databaseSource string, databaseDestination string) bool {
+func MigrateAll(source string, destination string, databaseSource string, databaseDestination string) (bool, error) {
         ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
         defer cancel()
         source_client, err := mongo.Connect(ctx, options.Client().ApplyURI(source))
@@ -39,14 +39,16 @@ func MigrateAll(source string, destination string, databaseSource string, databa
                 bson.D{},
         )
         if err != nil {
-                log.Panic(err)
+                fmt.Println(err)
+		return false, err
         }
 
         var total_estimate int64
         for i := 0; i < len(source_collections); i++ {
                 source_collection_estimate, err := source_client.Database(databaseSource).Collection(source_collections[i]).EstimatedDocumentCount(context.Background())
                 if err != nil {
-                        log.Panic(err)
+			fmt.Println(err)
+			return false, err
                 }
 
                 total_estimate = source_collection_estimate + total_estimate
@@ -61,19 +63,22 @@ func MigrateAll(source string, destination string, databaseSource string, databa
                 source_collection := source_database.Collection(source_collections[i])
                 cursor, err := source_collection.Find(context.TODO(), bson.D{})
                 if err != nil {
-                        log.Panic(err)
+			fmt.Println(err)
+			return false, err
                 }
 
                 destination_collection := destination_client.Database(databaseDestination).Collection(source_collections[i])
                 if err = cursor.All(context.TODO(), &results); err != nil {
-                        log.Panic(err)
+			fmt.Println(err)
+			return false, err
                 }
 
                 for _, result := range results {
                         //inserts, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
                         _, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
                         if err != nil {
-                                log.Panic(err)
+				fmt.Println(err)
+				return false, err
                         }
 
                         bar.Add(1)
@@ -84,11 +89,11 @@ func MigrateAll(source string, destination string, databaseSource string, databa
                 fmt.Println(fmt.Sprintf("Finish copying %s collection", source_collections[i]))
         }
 
-        return true
+        return true, nil
 }
 
 // migrate collections is per database and selective collections only
-func MigrateCollections(source string, destination string, databaseSource string, databaseDestination string, collections []string) bool {
+func MigrateCollections(source string, destination string, databaseSource string, databaseDestination string, collections []string) (bool, error) {
         ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
         defer cancel()
         source_client, err := mongo.Connect(ctx, options.Client().ApplyURI(source))
@@ -98,7 +103,8 @@ func MigrateCollections(source string, destination string, databaseSource string
         for i := 0; i < len(collections); i++ {
                 source_collection_estimate, err := source_client.Database(databaseSource).Collection(collections[i]).EstimatedDocumentCount(context.Background())
                 if err != nil {
-                        log.Panic(err)
+                        fmt.Println(err)
+			return false, err
                 }
 
                 total_estimate = source_collection_estimate + total_estimate
@@ -113,21 +119,24 @@ func MigrateCollections(source string, destination string, databaseSource string
                 source_collection := source_client.Database(databaseSource).Collection(collections[i])
                 cursor, err := source_collection.Find(context.TODO(), bson.D{})
                 if err != nil {
-	                log.Panic(err)
+	                fmt.Println(err)
+			return false, err
                 }
 
                 defer cursor.Close(context.Background())
 
                 destination_collection := destination_client.Database(databaseDestination).Collection(collections[i])
                 if err = cursor.All(context.TODO(), &results); err != nil {
-	                log.Panic(err)
+	                fmt.Println(err)
+			return false, err
                 }
 
                 for _, result := range results {
                         //inserts, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
                         _, err := destination_collection.InsertMany(context.TODO(), []interface{}{result})
                         if err != nil {
-                                log.Panic(err)
+				fmt.Println(err)
+				return false, err
                         }
 
                         bar.Add(1)
@@ -148,7 +157,7 @@ func MigrateCollections(source string, destination string, databaseSource string
             }
         }()
 
-        return true
+        return true, nil
 }
 
 func GetSetIndexes(source_collection *mongo.Collection, destination_collection *mongo.Collection) {
@@ -184,7 +193,7 @@ func GetSetIndexes(source_collection *mongo.Collection, destination_collection *
                                                 }
                                                 ind, err := destination_collection.Indexes().CreateOne(context.TODO(), mod)
                                                 if err != nil {
-                                                        fmt.Println("Indexes().CreateOne() ERROR:", err)
+                                                        fmt.Println("Indexes().CreateOne() Unique ERROR:", err)
                                                         os.Exit(1) // exit in case of error
                                                 } else {
                                                         // API call returns string of the index name
@@ -192,6 +201,7 @@ func GetSetIndexes(source_collection *mongo.Collection, destination_collection *
                                                         fmt.Println("CreateOne() type:", reflect.TypeOf(ind), "\n")
                                                 }
                                         default: // else add regular index
+					        fmt.Printf(fmt.Sprintf("k2: %s, v2 %s", k2, v2))
                                                 mod := mongo.IndexModel{
                                                         Keys: bson.M{
                                                                 k2: v2, // index in ascending order
@@ -199,7 +209,7 @@ func GetSetIndexes(source_collection *mongo.Collection, destination_collection *
                                                 }
                                                 ind, err := destination_collection.Indexes().CreateOne(context.TODO(), mod)
                                                 if err != nil {
-                                                        fmt.Println("Indexes().CreateOne() ERROR:", err)
+                                                        fmt.Println("Indexes().CreateOne() Regular ERROR:", err)
                                                         os.Exit(1) // exit in case of error
                                                 } else {
                                                         // API call returns string of the index name

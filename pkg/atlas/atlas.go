@@ -24,7 +24,7 @@ func AccessTest(pubkey string, privkey string) {
     fmt.Println("Projects: ", projects)
 }
 
-func PointInTimeRestore(projectName string, diskSize float64, tier string, clusterName string, pubkey string, privkey string, pointInTimeSeconds int64) error {
+func PointInTimeRestore(projectName string, diskSize float64, tier string, clusterName string, pubkey string, privkey string, pointInTimeSeconds int64, sourceCluster string, targetProjectId string) error {
     t := digest.NewTransport(pubkey, privkey)
     tc, err := t.Client()
     if err != nil {
@@ -58,8 +58,8 @@ func PointInTimeRestore(projectName string, diskSize float64, tier string, clust
                             ClusterName: clusterName,
                     }
                     cloudProviderSnapshot := &mongodbatlas.CloudProviderSnapshotRestoreJob{
-                        SourceClusterName: "dummyCluster", // source cluster name
-                        TargetGroupID: "targetProject", // change this later to be specifiable to restore to another project
+                        SourceClusterName: sourceCluster, // source cluster name
+                        TargetGroupID: targetProjectId, // change this later to be specifiable to restore to another project
                         TargetClusterName: clusterName, // target cluster is the one we're going to make
                         SnapshotID: snapshots.Results[i].ID,
                         PointInTimeUTCSeconds: pointInTimeSeconds, // UNIX epoch time in seconds
@@ -115,7 +115,8 @@ func PointInTimeRestore(projectName string, diskSize float64, tier string, clust
     _, _, err = client.Clusters.Create(context.Background(), project.ID, cluster)
     if err != nil {
 	    //fmt.Println(fmt.Sprintf("Error: %s", status))
-            panic(err)
+            fmt.Println(err)
+	    return err
     }
 
     bar := progressbar.Default(
@@ -126,7 +127,8 @@ func PointInTimeRestore(projectName string, diskSize float64, tier string, clust
     for {
                 c, _, err := client.Clusters.Get(context.Background(), project.ID, clusterName)
 		if err != nil {
-                        panic(err)
+			fmt.Println(err)
+                        return err
 		}
 		// progressBar
 		bar.Add(1)
@@ -149,7 +151,7 @@ func PointInTimeRestore(projectName string, diskSize float64, tier string, clust
     return nil
 }
 
-func AutomatedRestore(projectName string, diskSize float64, tier string, clusterName string, pubkey string, privkey string) error {
+func AutomatedRestore(projectName string, diskSize float64, tier string, clusterName string, pubkey string, privkey string, sourceCluster string, targetProjectId string) error {
         t := digest.NewTransport(pubkey, privkey)
         tc, err := t.Client()
         if err != nil {
@@ -185,7 +187,7 @@ func AutomatedRestore(projectName string, diskSize float64, tier string, cluster
                         }
                         cloudProviderSnapshot := &mongodbatlas.CloudProviderSnapshotRestoreJob{
                                 SourceClusterName: "dummyCluster", // source cluster name
-                                TargetGroupID: "targetProject", // change this later to be specifiable to restore to another project
+                                TargetGroupID: "targetProjectId", // change this later to be specifiable to restore to another project
                                 TargetClusterName: clusterName, // target cluster is the one we're going to make
                                 SnapshotID: snapshots.Results[i].ID,
                                 DeliveryType: "automated",
@@ -241,7 +243,8 @@ func AutomatedRestore(projectName string, diskSize float64, tier string, cluster
         _, _, err = client.Clusters.Create(context.Background(), project.ID, cluster)
         if err != nil {
                 //fmt.Println(fmt.Sprintf("Error: %s", status))
-                panic(err)
+		fmt.Println(err)
+		return err
         }
     
         bar := progressbar.Default(
@@ -252,7 +255,8 @@ func AutomatedRestore(projectName string, diskSize float64, tier string, cluster
         for {
                     c, _, err := client.Clusters.Get(context.Background(), project.ID, clusterName)
                     if err != nil {
-                            panic(err)
+                            fmt.Println(err)
+			    return err
                     }
                     // progressBar
                     bar.Add(1)
