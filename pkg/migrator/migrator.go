@@ -85,7 +85,8 @@ func MigrateAll(source string, destination string, databaseSource string, databa
                         //fmt.Println(inserts)
                 }
 
-                GetSetIndexes(source_collection, destination_collection)
+		// Disable copying of indexes for now
+                //GetSetIndexes(source_collection, destination_collection)
                 fmt.Println(fmt.Sprintf("Finish copying %s collection", source_collections[i]))
         }
 
