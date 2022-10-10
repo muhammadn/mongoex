@@ -10,7 +10,7 @@ import (
 
 var pointInTimeCmd = &cobra.Command{
     Use:   "pointintime",
-    Aliases: []string{"pit"},
+    Aliases: []string{"pitr"},
     Short:  "Create a temporary cluster and do a Point-In-Time-Recovery to this cluster",
     //Args:  cobra.ExactArgs(1),
     RunE: func(cmd *cobra.Command, args []string) error {
@@ -18,8 +18,6 @@ var pointInTimeCmd = &cobra.Command{
 	diskSize, _                  := cmd.Flags().GetString("diskSize")
 	tier, _                      := cmd.Flags().GetString("tier")
 	clusterName, _               := cmd.Flags().GetString("clusterName")
-	pubkey, _                    := cmd.Flags().GetString("pubkey")
-	privkey, _                   := cmd.Flags().GetString("privkey")
 	pointInTimeSeconds, _        := cmd.Flags().GetString("time")
 	sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
 	targetProjectID, _           := cmd.Flags().GetString("targetProject")
@@ -39,7 +37,7 @@ var pointInTimeCmd = &cobra.Command{
                         panic(err)
                 }
 	}
-	atlas.PointInTimeRestore(projectName, diskSizef, tier, clusterName, pubkey, privkey, timeSeconds, sourceClusterName, targetProjectID)
+	atlas.PointInTimeRestore(projectName, diskSizef, tier, clusterName, timeSeconds, sourceClusterName, targetProjectID)
         return nil
     },
 }
@@ -52,8 +50,6 @@ func init() {
         pointInTimeCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
         pointInTimeCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
         pointInTimeCmd.Flags().StringP("targetProject", "", "", "Target Project ID")
-        pointInTimeCmd.Flags().StringP("pubkey", "", "", "Public MongoDB API Key")
-        pointInTimeCmd.Flags().StringP("privkey", "", "", "Private MongoDB API Key")
 	pointInTimeCmd.Flags().StringP("time", "", "", "Point-in-time since epoch")
 
         pointInTimeCmd.MarkFlagRequired("proj")
@@ -61,8 +57,6 @@ func init() {
         pointInTimeCmd.MarkFlagRequired("tier")
         pointInTimeCmd.MarkFlagRequired("clusterName")
         pointInTimeCmd.MarkFlagRequired("time")
-        pointInTimeCmd.MarkFlagRequired("pubkey")
-        pointInTimeCmd.MarkFlagRequired("privkey")
         pointInTimeCmd.MarkFlagRequired("sourceClusterName")
         pointInTimeCmd.MarkFlagRequired("targetProject")
 }
