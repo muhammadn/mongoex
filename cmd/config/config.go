@@ -7,7 +7,7 @@ import (
         "github.com/spf13/viper"
 )
 
-func Run() (string, string) {
+func ParseConfig() (string, string) {
 	type Profile struct {
 	        PrivateKey string `mapstructure:"privateKey"`
 		PublicKey string `mapstructure:"publicKey"`

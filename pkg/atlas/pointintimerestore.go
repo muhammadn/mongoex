@@ -13,7 +13,7 @@ import (
 )
 
 func PointInTimeRestore(projectName string, diskSize float64, tier string, clusterName string, pointInTimeSeconds int64, sourceCluster string, targetProjectId string) error {
-    pubkey, privkey := config.Run()
+    pubkey, privkey := config.ParseConfig()
     t := digest.NewTransport(pubkey, privkey)
     tc, err := t.Client()
     if err != nil {
