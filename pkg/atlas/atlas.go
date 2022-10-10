@@ -10,6 +10,7 @@ import (
     "github.com/mwielbut/pointy"
     "fmt"
     "github.com/schollz/progressbar/v3"
+    "mongoex/cmd/config"
 )
 
 func AccessTest(pubkey string, privkey string) {
@@ -24,17 +25,20 @@ func AccessTest(pubkey string, privkey string) {
     fmt.Println("Projects: ", projects)
 }
 
-func PointInTimeRestore(projectName string, diskSize float64, tier string, clusterName string, pubkey string, privkey string, pointInTimeSeconds int64, sourceCluster string, targetProjectId string) error {
+func PointInTimeRestore(projectName string, diskSize float64, tier string, clusterName string, pointInTimeSeconds int64, sourceCluster string, targetProjectId string) error {
+    pubkey, privkey := config.Run()
     t := digest.NewTransport(pubkey, privkey)
     tc, err := t.Client()
     if err != nil {
-        log.Fatalf(err.Error())
+        fmt.Println(err)
+	return err
     }
 
     client := mongodbatlas.NewClient(tc)
     project, _, err := client.Projects.GetOneProjectByName(context.Background(), projectName)
     if err != nil {
-            panic(err)
+	    fmt.Println(err)
+            return err
     }
     fmt.Println(fmt.Sprintf("Project Name: %s\nProject ID: %s\nTemporary ClusterName: %s", projectName, project.ID, clusterName))
 
@@ -151,17 +155,20 @@ func PointInTimeRestore(projectName string, diskSize float64, tier string, clust
     return nil
 }
 
-func AutomatedRestore(projectName string, diskSize float64, tier string, clusterName string, pubkey string, privkey string, sourceCluster string, targetProjectId string) error {
+func AutomatedRestore(projectName string, diskSize float64, tier string, clusterName string, sourceCluster string, targetProjectId string) error {
+        pubkey, privkey := config.Run()
         t := digest.NewTransport(pubkey, privkey)
         tc, err := t.Client()
         if err != nil {
-            log.Fatalf(err.Error())
+                fmt.Println(err)
+	        return err
         }
     
         client := mongodbatlas.NewClient(tc)
         project, _, err := client.Projects.GetOneProjectByName(context.Background(), projectName)
         if err != nil {
-                panic(err)
+	        fmt.Println(err)
+		return err
         }
         fmt.Println(fmt.Sprintf("Project Name: %s\nProject ID: %s\nTemporary ClusterName: %s", projectName, project.ID, clusterName))
     

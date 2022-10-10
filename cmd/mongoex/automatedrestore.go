@@ -17,8 +17,6 @@ var automatedRestoreCmd = &cobra.Command{
 	diskSize, _                  := cmd.Flags().GetString("diskSize")
 	tier, _                      := cmd.Flags().GetString("tier")
 	clusterName, _               := cmd.Flags().GetString("clusterName")
-	pubkey, _                    := cmd.Flags().GetString("pubkey")
-	privkey, _                   := cmd.Flags().GetString("privkey")
         sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
         targetProjectID, _           := cmd.Flags().GetString("targetProject")
 
@@ -29,7 +27,7 @@ var automatedRestoreCmd = &cobra.Command{
                 panic(err)
 	}
 
-	atlas.AutomatedRestore(projectName, diskSizef, tier, clusterName, pubkey, privkey, sourceClusterName, targetProjectID)
+	atlas.AutomatedRestore(projectName, diskSizef, tier, clusterName, sourceClusterName, targetProjectID)
         return nil
     },
 }
@@ -40,8 +38,6 @@ func init() {
         automatedRestoreCmd.Flags().StringP("diskSize", "d", "", "Cluster disk size for target temporary cluster")
         automatedRestoreCmd.Flags().StringP("tier", "t", "", "Tier for temporary cluster")
         automatedRestoreCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
-        automatedRestoreCmd.Flags().StringP("pubkey", "", "", "Public MongoDB API Key")
-        automatedRestoreCmd.Flags().StringP("privkey", "", "", "Private MongoDB API Key")
         automatedRestoreCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
 	automatedRestoreCmd.Flags().StringP("targetProject", "", "", "Target Project ID")
 
@@ -49,8 +45,6 @@ func init() {
         automatedRestoreCmd.MarkFlagRequired("diskSize")
         automatedRestoreCmd.MarkFlagRequired("tier")
         automatedRestoreCmd.MarkFlagRequired("clusterName")
-        automatedRestoreCmd.MarkFlagRequired("pubkey")
-        automatedRestoreCmd.MarkFlagRequired("privkey")
         automatedRestoreCmd.MarkFlagRequired("sourceClusterName")
         automatedRestoreCmd.MarkFlagRequired("targetProject")
 }
