@@ -13,6 +13,8 @@ mongoex migrate -s mongodb+srv://yourusername:yourpassword@cluster0.abc123.mongo
 Example for selective collections to copy:
 ```
 mongoex migrate -s mongodb+srv://yourusername:yourpassword@cluster0.abc123.mongodb.net/\?retryWrites=true\&w=majority -d mongodb+srv://yourusername:yourpassword@cluster0.53yz2fy.mongodb.net/\?retryWrites=true\&w=majority --dbsrc sample_restaurants --dbdest sample_airbnb -c collection1,collection2,collection3...
+
+`NOTE: -c flag for collection will get those collection from --dbsrc database`
 ```
 Try using `--help` flag to see the options, normally you will see this:
 
