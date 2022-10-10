@@ -20,7 +20,6 @@ var automatedRestoreCmd = &cobra.Command{
         sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
         targetProjectID, _           := cmd.Flags().GetString("targetProject")
 
-        //atlas.AccessTest()
 	// convert diskSize from string to float which is required
 	diskSizef, err := strconv.ParseFloat(diskSize, 1)
 	if err != nil {

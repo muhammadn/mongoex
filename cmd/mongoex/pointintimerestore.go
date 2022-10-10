@@ -21,7 +21,7 @@ var pointInTimeCmd = &cobra.Command{
 	pointInTimeSeconds, _        := cmd.Flags().GetString("time")
 	sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
 	targetProjectID, _           := cmd.Flags().GetString("targetProject")
-        //atlas.AccessTest()
+
 	// convert diskSize from string to float which is required
 	diskSizef, err := strconv.ParseFloat(diskSize, 1)
 	if err != nil {
@@ -50,13 +50,13 @@ func init() {
         pointInTimeCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
         pointInTimeCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
         pointInTimeCmd.Flags().StringP("targetProject", "", "", "Target Project ID")
-	pointInTimeCmd.Flags().StringP("time", "", "", "Point-in-time since epoch")
+	pointInTimeCmd.Flags().StringP("time", "", "", "Point-in-time since epoch (defaults to current time)")
 
         pointInTimeCmd.MarkFlagRequired("proj")
         pointInTimeCmd.MarkFlagRequired("diskSize")
         pointInTimeCmd.MarkFlagRequired("tier")
         pointInTimeCmd.MarkFlagRequired("clusterName")
-        pointInTimeCmd.MarkFlagRequired("time")
+        // pointInTimeCmd.MarkFlagRequired("time") // time is optional, if omitted, it will defaul tto current time
         pointInTimeCmd.MarkFlagRequired("sourceClusterName")
         pointInTimeCmd.MarkFlagRequired("targetProject")
 }
