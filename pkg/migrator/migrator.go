@@ -17,20 +17,24 @@ import (
 )
 
 // migrate all is per database basis
-func MigrateAll(source string, destination string, databaseSource string, databaseDestination string) (bool, error) {
+func MigrateAll(source string, destination string, databaseSource string, databaseDestination string, dropCollection bool) (bool, error) {
         ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
         defer cancel()
         source_client, err := mongo.Connect(ctx, options.Client().ApplyURI(source))
         destination_client, err := mongo.Connect(ctx, options.Client().ApplyURI(destination))
 
-        defer func() {
+        defer func() (bool, error) {
             if err = source_client.Disconnect(ctx); err != nil {
                 fmt.Println(err)
+                return false, err
             }
 
             if err = destination_client.Disconnect(ctx); err != nil {
                 fmt.Println(err)
+                return false, err
             }
+
+            return true, nil
         }() 
  
         source_database := source_client.Database(databaseSource)
@@ -68,6 +72,10 @@ func MigrateAll(source string, destination string, databaseSource string, databa
                 }
 
                 destination_collection := destination_client.Database(databaseDestination).Collection(source_collections[i])
+                // if --dropCollection flag is used
+                if dropCollection {
+                        destination_client.Database(databaseDestination).Collection(source_collections[i]).Drop(context.TODO())
+                }
                 if err = cursor.All(context.TODO(), &results); err != nil {
 			fmt.Println(err)
 			return false, err
@@ -94,7 +102,7 @@ func MigrateAll(source string, destination string, databaseSource string, databa
 }
 
 // migrate collections is per database and selective collections only
-func MigrateCollections(source string, destination string, databaseSource string, databaseDestination string, collections []string) (bool, error) {
+func MigrateCollections(source string, destination string, databaseSource string, databaseDestination string, collections []string, dropCollection bool) (bool, error) {
         ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
         defer cancel()
         source_client, err := mongo.Connect(ctx, options.Client().ApplyURI(source))
@@ -127,6 +135,10 @@ func MigrateCollections(source string, destination string, databaseSource string
                 defer cursor.Close(context.Background())
 
                 destination_collection := destination_client.Database(databaseDestination).Collection(collections[i])
+                // if --dropCollection flag is used
+                if dropCollection {
+                        destination_client.Database(databaseDestination).Collection(collections[i]).Drop(context.TODO())
+                }
                 if err = cursor.All(context.TODO(), &results); err != nil {
 	                fmt.Println(err)
 			return false, err
@@ -149,14 +161,18 @@ func MigrateCollections(source string, destination string, databaseSource string
 		fmt.Println(fmt.Sprintf("Finish copying %s collection", collections[i]))
         }
 
-        defer func() {
+        defer func() (bool, error) {
             if err = source_client.Disconnect(ctx); err != nil {
                 fmt.Println(err)
+                return false, err
             }
 
             if err = destination_client.Disconnect(ctx); err != nil {
                 fmt.Println(err)
+                return false, err
             }
+
+            return true, nil
         }()
 
         return true, nil
