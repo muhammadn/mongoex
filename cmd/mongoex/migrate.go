@@ -18,6 +18,7 @@ var migrateCmd = &cobra.Command{
         collections, _          := cmd.Flags().GetString("collections")
         databaseSource, _       := cmd.Flags().GetString("dbsrc")
         databaseDestination, _  := cmd.Flags().GetString("dbdest")
+        dropCollection, _       := cmd.Flags().GetBool("dropCollection")
  
         coll := strings.Split(collections, ",")
 
@@ -31,7 +32,7 @@ var migrateCmd = &cobra.Command{
         fmt.Println("Database Destination: ", databaseDestination)
 
         if collections != "" {
-                res, err := migrator.MigrateCollections(source, destination, databaseSource, databaseDestination, coll)
+                res, err := migrator.MigrateCollections(source, destination, databaseSource, databaseDestination, coll, dropCollection)
 		if err != nil {
                         fmt.Println(err)
 			return err
@@ -43,7 +44,7 @@ var migrateCmd = &cobra.Command{
 		} 
         }
 
-        res, err := migrator.MigrateAll(source, destination, databaseSource, databaseDestination)
+        res, err := migrator.MigrateAll(source, destination, databaseSource, databaseDestination, dropCollection)
 	if err != nil {
                 fmt.Println(err)
 		return err
@@ -57,12 +58,15 @@ var migrateCmd = &cobra.Command{
 }
 
 func init() {
+        var dropCollection bool
+
         rootCmd.AddCommand(migrateCmd)
         migrateCmd.Flags().StringP("source", "s", "mongodb://localhost:27017", "Source MongoDB Host. Example: (\"mongodb://username:password@localhost:27017\")")
         migrateCmd.Flags().StringP("destination", "d", "mongodb://localhost:27017", "Destination MongoDB Host: Example: (\"mongodb://username:password@localhost:27017\")")
         migrateCmd.Flags().StringP("dbsrc", "", "", "Source Database (optional), else will migrate all if this is omitted")
         migrateCmd.Flags().StringP("dbdest", "", "", "Destination Database (optional), else will migrate all if this is omitted")
         migrateCmd.Flags().StringP("collections", "c", "", "List of collections (optional), else will migrate all if this is omitted")
+        migrateCmd.Flags().BoolVarP(&dropCollection, "dropCollection", "", false, "drop the existing identical collection (names) in destination database")
 
 	migrateCmd.MarkFlagRequired("dbsrc")
 	migrateCmd.MarkFlagRequired("dbdest")
