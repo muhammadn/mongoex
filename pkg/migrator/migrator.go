@@ -74,6 +74,7 @@ func MigrateAll(source string, destination string, databaseSource string, databa
                 destination_collection := destination_client.Database(databaseDestination).Collection(source_collections[i])
                 // if --dropCollection flag is used
                 if dropCollection {
+                        fmt.Println(fmt.Sprintf("Dropping %s collection and recreating for new data...", source_collections[i]))
                         destination_client.Database(databaseDestination).Collection(source_collections[i]).Drop(context.TODO())
                 }
                 if err = cursor.All(context.TODO(), &results); err != nil {
@@ -137,6 +138,7 @@ func MigrateCollections(source string, destination string, databaseSource string
                 destination_collection := destination_client.Database(databaseDestination).Collection(collections[i])
                 // if --dropCollection flag is used
                 if dropCollection {
+                        fmt.Println(fmt.Sprintf("Dropping %s collection and recreating for new data...", collections[i]))
                         destination_client.Database(databaseDestination).Collection(collections[i]).Drop(context.TODO())
                 }
                 if err = cursor.All(context.TODO(), &results); err != nil {
