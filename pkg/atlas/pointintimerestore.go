@@ -184,9 +184,11 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
             panic(err)
     }
 
-    fmt.Println(fmt.Sprintf("I'm now doing Point-in-time-Recovery from EPOCH time: %d", pointInTimeSeconds))
-    //fmt.Println("Please check MongoDB Atlas for progress")
+    fmt.Println(fmt.Sprintf("Now doing Point-in-time-Recovery from EPOCH time: %d", pointInTimeSeconds))
+    fmt.Println(fmt.Sprintf("Restore PIT Job ID: %d", restoreJob.ID))
+    fmt.Println("Please check MongoDB Atlas for progress")
 
+    /* Disabled until we figure out whether should be check it synchronously
     p := &mongodbatlas.SnapshotReqPathParameters{
             GroupID:     project.ID,
             ClusterName: sourceCluster,
@@ -214,6 +216,7 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
             }
             time.Sleep(15)
     }
+    */
     // end of cluster restore code
 
     return nil
