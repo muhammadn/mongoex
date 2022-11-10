@@ -16,6 +16,13 @@ import (
 )
 
 func PointInTimeRestore(projectName string, clusterName string, pointInTimeSeconds int64, sourceCluster string, targetProjectName string) error {
+    // checks code from Chee Lim to prevent accidentally copying from src and dest
+    if clusterName == sourceCluster {
+	fmt.Println("Target cluster name cannot be identical to Source cluster name")
+	fmt.Println("Please double check in MongoDB Atlas")
+        return nil
+    }
+
     pubkey, privkey := config.ParseConfig()
     t := digest.NewTransport(pubkey, privkey)
     tc, err := t.Client()
@@ -48,8 +55,8 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
     //fmt.Println("ConnectionStrings: ", *sc.ConnectionStrings)
     
     mongoMeasurements := &mongodbatlas.ProcessMeasurementListOptions{
-            Granularity: "PT24H",
-            Period:      "PT24H",
+            Granularity: "PT24H", // 24hrs
+            Period:      "PT128H", // 128hrs
             M:           []string{"DB_DATA_SIZE_TOTAL"},
     }
 
@@ -61,6 +68,7 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
         panic(err)
     }
     measurements, _, err := client.ProcessMeasurements.List(context.Background(), project.ID, hostname, port, mongoMeasurements)
+    fmt.Println("data: ", measurements.Measurements[0])
     measurementVal := *measurements.Measurements[0].DataPoints[0].Value
     
     // convert float exponent to integer
@@ -171,23 +179,28 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
             DeliveryType: "pointInTime",
     }
 
-    _, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
+    restoreJob, _, err := client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
     if err != nil {
             panic(err)
     }
 
-    fmt.Println("I'm now doing Point-in-time-Recovery from EPOCH time: ", pointInTimeSeconds)
-    fmt.Println("Please check MongoDB Atlas for progress")
+    fmt.Println(fmt.Sprintf("I'm now doing Point-in-time-Recovery from EPOCH time: %d", pointInTimeSeconds))
+    //fmt.Println("Please check MongoDB Atlas for progress")
 
-    /* we don't monitor PITR restore progress for now
-    bar := progressbar.Default(
+    p := &mongodbatlas.SnapshotReqPathParameters{
+            GroupID:     project.ID,
+            ClusterName: sourceCluster,
+            JobID:       restoreJob.ID,
+    }
+
+    bar = progressbar.Default(
                 -1,
                 "Restoring from Point-In-Time Recovery",
     )
 
     for {
             // gs/get snapshot
-            gs, _, err := client.CloudProviderSnapshotRestoreJobs.Get(context.Background(), o)
+            gs, _, err := client.CloudProviderSnapshotRestoreJobs.Get(context.Background(), p)
             if err != nil {
                     panic(err)
             }
@@ -201,7 +214,6 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
             }
             time.Sleep(15)
     }
-    */
     // end of cluster restore code
 
     return nil
