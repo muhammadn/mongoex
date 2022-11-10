@@ -207,7 +207,7 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
 	    */
 
 	}
-	fmt.Println("Target cluster name cannot be identical to Source cluster)
+	fmt.Println("Target cluster name cannot be identical to Source cluster")
 	fmt.Println("Please double check in MongoDB Atlas")
 
     // end of cluster restore code
