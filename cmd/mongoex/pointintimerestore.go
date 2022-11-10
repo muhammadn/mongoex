@@ -14,8 +14,8 @@ var pointInTimeCmd = &cobra.Command{
     Short:  "Create a temporary cluster and do a Point-In-Time-Recovery to this cluster",
     //Args:  cobra.ExactArgs(1),
     RunE: func(cmd *cobra.Command, args []string) error {
-        projectName, _               := cmd.Flags().GetString("proj")
-	clusterName, _               := cmd.Flags().GetString("clusterName")
+        projectName, _               := cmd.Flags().GetString("sourceProject")
+	clusterName, _               := cmd.Flags().GetString("targetClusterName")
 	pointInTimeSeconds, _        := cmd.Flags().GetString("time")
 	sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
 	targetProjectID, _           := cmd.Flags().GetString("targetProject")
@@ -34,8 +34,8 @@ var pointInTimeCmd = &cobra.Command{
 
 func init() {
         tempClusterCmd.AddCommand(pointInTimeCmd)
-        pointInTimeCmd.Flags().StringP("proj", "p", "", "MongoDB Project Name")
-        pointInTimeCmd.Flags().StringP("clusterName", "c", "", "Name for temporary cluster")
+        pointInTimeCmd.Flags().StringP("proj", "", "", "MongoDB Project Name")
+        pointInTimeCmd.Flags().StringP("clusterName", "", "", "Name for temporary cluster")
         pointInTimeCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
         pointInTimeCmd.Flags().StringP("targetProject", "", "", "Target Project ID")
 	pointInTimeCmd.Flags().StringP("time", "", "", "Point-in-time since epoch (defaults to current time)")
