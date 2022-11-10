@@ -16,7 +16,7 @@ import (
 )
 
 func PointInTimeRestore(projectName string, clusterName string, pointInTimeSeconds int64, sourceCluster string, targetProjectName string) error {
-    // checks code from Chee Lim to prevent accidentally copying from src and dest
+    // Validate target cluster, prevent accidental override source cluser
     if clusterName == sourceCluster {
 	fmt.Println("Target cluster name cannot be identical to Source cluster name")
 	fmt.Println("Please double check in MongoDB Atlas")
