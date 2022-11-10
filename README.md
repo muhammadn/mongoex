@@ -38,3 +38,8 @@ Flags:
 
 Use "mongoex [command] --help" for more information about a command.
 ```
+
+Doing automated Point-in-Time Recovery to a temporary cluster
+```
+mongoex atlas tempcluster pointintime --targetClusterName tempCluster --sourceProject SetelPay-Dev --sourceClusterName setelpay-dev-cluster --targetProject SetelPay-Dev --time 1668040812
+```

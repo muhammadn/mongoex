@@ -14,11 +14,11 @@ var pointInTimeCmd = &cobra.Command{
     Short:  "Create a temporary cluster and do a Point-In-Time-Recovery to this cluster",
     //Args:  cobra.ExactArgs(1),
     RunE: func(cmd *cobra.Command, args []string) error {
-        projectName, _               := cmd.Flags().GetString("sourceProject")
-	clusterName, _               := cmd.Flags().GetString("targetClusterName")
+        sourceProjectName, _               := cmd.Flags().GetString("sourceProject")
+	targetClusterName, _         := cmd.Flags().GetString("targetClusterName")
 	pointInTimeSeconds, _        := cmd.Flags().GetString("time")
 	sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
-	targetProjectID, _           := cmd.Flags().GetString("targetProject")
+	targetProjectName, _           := cmd.Flags().GetString("targetProject")
 
 	// convert diskSize from string to float which is required
         var timeSeconds int64
@@ -27,15 +27,15 @@ var pointInTimeCmd = &cobra.Command{
 	} else {
 		timeSeconds, _ = strconv.ParseInt(pointInTimeSeconds, 10, 64)
 	}
-	atlas.PointInTimeRestore(projectName, clusterName, timeSeconds, sourceClusterName, targetProjectID)
+	atlas.PointInTimeRestore(sourceProjectName, targetClusterName, timeSeconds, sourceClusterName, targetProjectName)
         return nil
     },
 }
 
 func init() {
         tempClusterCmd.AddCommand(pointInTimeCmd)
-        pointInTimeCmd.Flags().StringP("proj", "", "", "MongoDB Project Name")
-        pointInTimeCmd.Flags().StringP("clusterName", "", "", "Name for temporary cluster")
+        pointInTimeCmd.Flags().StringP("sourceProject", "", "", "Source MongoDB Project Name")
+        pointInTimeCmd.Flags().StringP("targetClusterName", "", "", "Name for temporary cluster")
         pointInTimeCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
         pointInTimeCmd.Flags().StringP("targetProject", "", "", "Target Project ID")
 	pointInTimeCmd.Flags().StringP("time", "", "", "Point-in-time since epoch (defaults to current time)")
