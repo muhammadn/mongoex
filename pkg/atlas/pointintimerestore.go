@@ -173,6 +173,9 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
             panic(err)
     }
 
+    fmt.Println("I'm now doing Point-in-time-Recovery from EPOCH time: ", pointInTimeSeconds)
+    fmt.Println("Please check MongoDB Atlas for progress")
+
     /* we don't monitor PITR restore progress for now
     bar := progressbar.Default(
                 -1,
