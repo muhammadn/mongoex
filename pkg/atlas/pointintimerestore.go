@@ -171,37 +171,45 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
             DeliveryType: "pointInTime",
     }
 
-    _, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
-    if err != nil {
-            panic(err)
-    }
+	//Avoid restoring in the source cluster
+	if clusterName != sourceCluster {
+		
+	    _, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
+	    if err != nil {
+		    panic(err)
+	    }
 
-    fmt.Println("I'm now doing Point-in-time-Recovery from EPOCH time: ", pointInTimeSeconds)
-    fmt.Println("Please check MongoDB Atlas for progress")
+	    fmt.Println("I'm now doing Point-in-time-Recovery from EPOCH time: ", pointInTimeSeconds)
+	    fmt.Println("Please check MongoDB Atlas for progress")
 
-    /* we don't monitor PITR restore progress for now
-    bar := progressbar.Default(
-                -1,
-                "Restoring from Point-In-Time Recovery",
-    )
+	    /* we don't monitor PITR restore progress for now
+	    bar := progressbar.Default(
+			-1,
+			"Restoring from Point-In-Time Recovery",
+	    )
 
-    for {
-            // gs/get snapshot
-            gs, _, err := client.CloudProviderSnapshotRestoreJobs.Get(context.Background(), o)
-            if err != nil {
-                    panic(err)
-            }
+	    for {
+		    // gs/get snapshot
+		    gs, _, err := client.CloudProviderSnapshotRestoreJobs.Get(context.Background(), o)
+		    if err != nil {
+			    panic(err)
+		    }
 
-            // progressBar
-            bar.Add(1)
+		    // progressBar
+		    bar.Add(1)
 
-            if *gs.Failed == false {
-                    fmt.Println(fmt.Sprintf("Finished restoring to %s cluster on %s", clusterName, targetProject.ID))
-                    break
-            }
-            time.Sleep(15)
-    }
-    */
+		    if *gs.Failed == false {
+			    fmt.Println(fmt.Sprintf("Finished restoring to %s cluster on %s", clusterName, targetProject.ID))
+			    break
+		    }
+		    time.Sleep(15)
+	    }
+	    */
+
+	}
+	fmt.Println("Target cluster name cannot be identical to Source cluster)
+	fmt.Println("Please double check in MongoDB Atlas")
+
     // end of cluster restore code
 
     return nil
