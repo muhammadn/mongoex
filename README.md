@@ -40,6 +40,7 @@ Use "mongoex [command] --help" for more information about a command.
 ```
 
 Doing automated Point-in-Time Recovery to a temporary cluster
+NOTE: To do this, you need to enable API Access List for your API Key - https://mongodb.com/docs/atlas/configure-api-access/#std-label-enable-api-access-list
 ```
 mongoex atlas tempcluster pointintime --targetClusterName tempCluster --sourceProject SetelPay-Dev --sourceClusterName setelpay-dev-cluster --targetProject SetelPay-Dev --time 1668040812
 ```

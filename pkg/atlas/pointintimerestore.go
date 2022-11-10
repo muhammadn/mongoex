@@ -81,10 +81,13 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
     case diskUsage > 549755813888:
             tier = "M40"
             break
+    // more than 1TB
     case diskUsage > 1099511627776:
             tier = "M50"
             break
     // if not more than 128GB or not in sizes above
+    // max disk size in MongoDB Atlas is 4TB anyway, the max is M50
+    // default is M10 which is the smallest dedicated instance
     default:
             tier = "M10"
     }

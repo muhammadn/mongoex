@@ -10,7 +10,7 @@ import (
 
 var pointInTimeCmd = &cobra.Command{
     Use:   "pointintime",
-    Aliases: []string{"pitr"},
+    Aliases: []string{"pit"},
     Short:  "Create a temporary cluster and do a Point-In-Time-Recovery to this cluster",
     //Args:  cobra.ExactArgs(1),
     RunE: func(cmd *cobra.Command, args []string) error {
