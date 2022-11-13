@@ -15,9 +15,9 @@ import (
     "strconv"
 )
 
-func PointInTimeRestore(projectName string, clusterName string, pointInTimeSeconds int64, sourceCluster string, targetProjectName string) error {
+func PointInTimeRestore(sourceProjectName string, targetClusterName string, pointInTimeSeconds int64, sourceClusterName string, targetProjectName string) error {
     // Validate target cluster, prevent accidental override source cluser
-    if clusterName == sourceCluster {
+    if targetClusterName == sourceClusterName {
 	fmt.Println("Target cluster name cannot be identical to Source cluster name")
 	fmt.Println("Please double check in MongoDB Atlas")
         return nil
@@ -32,21 +32,21 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
     }
 
     client := mongodbatlas.NewClient(tc)
-    project, _, err := client.Projects.GetOneProjectByName(context.Background(), projectName)
+    sourceProject, _, err := client.Projects.GetOneProjectByName(context.Background(), sourceProjectName)
     targetProject, _, err := client.Projects.GetOneProjectByName(context.Background(), targetProjectName)
     if err != nil {
 	    fmt.Println(err)
             return err
     }
-    fmt.Println(fmt.Sprintf("Project Name: %s\nProject ID: %s\nTemporary ClusterName: %s", projectName, project.ID, clusterName))
+    fmt.Println(fmt.Sprintf("Source Project Name: %s\nSource Project ID: %s\nSource ClusterName %s\nTarget Project Name: %s\nTarget Project ID: %s\nTarget ClusterName: %s", sourceProjectName, sourceProject.ID, sourceClusterName, targetProjectName, targetProject.ID, targetClusterName))
 
     // sc = source cluster
-    sc, _, err := client.Clusters.Get(context.Background(), project.ID, sourceCluster)
+    sc, _, err := client.Clusters.Get(context.Background(), sourceProject.ID, sourceClusterName)
     if err != nil {
                 fmt.Println(err)
                 return err
     }
-    fmt.Println(fmt.Sprintf("Source Cluster %s, Disk size: %.2fGB", sourceCluster, *sc.DiskSizeGB))
+    fmt.Println(fmt.Sprintf("Source Cluster %s, Disk size: %.2fGB", sourceClusterName, *sc.DiskSizeGB))
 
     srcMongoURI      := strings.Split(sc.MongoURI, ",")
     firstMongoURI    := srcMongoURI[0] // get the first mongodb string
@@ -67,8 +67,7 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
     if err != nil {
         panic(err)
     }
-    measurements, _, err := client.ProcessMeasurements.List(context.Background(), project.ID, hostname, port, mongoMeasurements)
-    fmt.Println("data: ", measurements.Measurements[0])
+    measurements, _, err := client.ProcessMeasurements.List(context.Background(), sourceProject.ID, hostname, port, mongoMeasurements)
     measurementVal := *measurements.Measurements[0].DataPoints[0].Value
     
     // convert float exponent to integer
@@ -118,7 +117,7 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
     }
 
     cluster := &mongodbatlas.Cluster{
-	    Name: clusterName,
+	    Name: targetClusterName,
 	    DiskSizeGB: sc.DiskSizeGB,
 	    ClusterType: "REPLICASET",
 	    ProviderBackupEnabled: pointy.Bool(false),
@@ -129,7 +128,7 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
 	    ReplicationSpec: regionsConfig,
     }
 
-    _, _, err = client.Clusters.Create(context.Background(), project.ID, cluster)
+    _, _, err = client.Clusters.Create(context.Background(), targetProject.ID, cluster)
     if err != nil {
             fmt.Println(err)
 	    return err
@@ -142,7 +141,7 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
 
     for {
                 // dc = destination cluster
-                dc, _, err := client.Clusters.Get(context.Background(), project.ID, clusterName)
+                dc, _, err := client.Clusters.Get(context.Background(), targetProject.ID, targetClusterName)
 		if err != nil {
 			fmt.Println(err)
                         return err
@@ -168,30 +167,31 @@ func PointInTimeRestore(projectName string, clusterName string, pointInTimeSecon
     // this would be the logic to create the cluster to restore
     // start of cluster restore code
     o := &mongodbatlas.SnapshotReqPathParameters{
-            GroupID:     project.ID,
-            ClusterName: sourceCluster,
+            GroupID:     sourceProject.ID,
+            ClusterName: sourceClusterName,
     }
 
     cloudProviderSnapshot := &mongodbatlas.CloudProviderSnapshotRestoreJob{
             TargetGroupID: targetProject.ID, // change this later to be specifiable to restore to another project
-            TargetClusterName: clusterName, // target cluster is the one we're going to make
+            TargetClusterName: targetClusterName, // target cluster is the one we're going to make
             PointInTimeUTCSeconds: pointInTimeSeconds, // UNIX epoch time in seconds
             DeliveryType: "pointInTime",
     }
 
-    restoreJob, _, err := client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
+    //restoreJob, _, err := client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
+    _, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
     if err != nil {
             panic(err)
     }
 
     fmt.Println(fmt.Sprintf("Now doing Point-in-time-Recovery from EPOCH time: %d", pointInTimeSeconds))
-    fmt.Println(fmt.Sprintf("Restore PIT Job ID: %d", restoreJob.ID))
+    //fmt.Println(fmt.Sprintf("Restore PIT Job ID: %d", restoreJob.ID))
     fmt.Println("Please check MongoDB Atlas for progress")
 
     /* Disabled until we figure out whether should be check it synchronously
     p := &mongodbatlas.SnapshotReqPathParameters{
-            GroupID:     project.ID,
-            ClusterName: sourceCluster,
+            GroupID:     sourceProject.ID,
+            ClusterName: sourceClusterName,
             JobID:       restoreJob.ID,
     }
 
