@@ -13,11 +13,12 @@ import (
     "strings"
     "net/url"
     "strconv"
+    "errors"
 )
 
 func PointInTimeRestore(sourceProjectName string, targetClusterName string, pointInTimeSeconds int64, sourceClusterName string, targetProjectName string) error {
     // Validate target cluster, prevent accidental override source cluser
-    if targetClusterName == sourceClusterName {
+    if targetClusterName == sourceClusterName && sourceProjectName == targetProjectName {
 	fmt.Println("Target cluster name cannot be identical to Source cluster name")
 	fmt.Println("Please double check in MongoDB Atlas")
         return nil
@@ -38,7 +39,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 	    fmt.Println(err)
             return err
     }
-    fmt.Println(fmt.Sprintf("Source Project Name: %s\nSource Project ID: %s\nSource ClusterName %s\nTarget Project Name: %s\nTarget Project ID: %s\nTarget ClusterName: %s", sourceProjectName, sourceProject.ID, sourceClusterName, targetProjectName, targetProject.ID, targetClusterName))
+    fmt.Println(fmt.Sprintf("Source Project Name: %s\nSource Project ID: %s\nSource ClusterName %s\n\nTarget Project Name: %s\nTarget Project ID: %s\nTarget ClusterName: %s\n", sourceProjectName, sourceProject.ID, sourceClusterName, targetProjectName, targetProject.ID, targetClusterName))
 
     // sc = source cluster
     sc, _, err := client.Clusters.Get(context.Background(), sourceProject.ID, sourceClusterName)
@@ -67,9 +68,32 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     if err != nil {
         panic(err)
     }
+
     measurements, _, err := client.ProcessMeasurements.List(context.Background(), sourceProject.ID, hostname, port, mongoMeasurements)
-    measurementVal := *measurements.Measurements[0].DataPoints[0].Value
-    
+    if measurements.Measurements == nil {
+            err = errors.New("There is no measurements to determine the datr size")
+	    return err
+    }
+
+    // for disk size measurement data points, it can return an array/slice and we need to pick
+    // the largest value in the slice
+    var measurementVal float32
+    measurementDataPoints := measurements.Measurements[0].DataPoints
+    for j := 0; j < len(measurementDataPoints) ; j++ {
+	k := j + 1 // forward lookup for k index
+
+	if k > 0 && k < len(measurementDataPoints) {
+	        currentDataPoint := *measurements.Measurements[0].DataPoints[j].Value // first ordered data in slice
+	        nextDataPoint    := *measurements.Measurements[0].DataPoints[k].Value // next data in slice
+		//fmt.Println("currentDataPoint: ", currentDataPoint)
+                //fmt.Println("nextDataPoint: ", nextDataPoint)
+	        if int64(nextDataPoint) >= int64(currentDataPoint) {
+                        measurementVal = *measurements.Measurements[0].DataPoints[k].Value
+			//fmt.Println("measurementVal: ", measurementVal)
+	        }
+        }
+    }
+
     // convert float exponent to integer
     diskUsage := int64(measurementVal)
 
