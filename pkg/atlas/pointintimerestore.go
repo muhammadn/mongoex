@@ -6,7 +6,7 @@ import (
 
     "github.com/mongodb-forks/digest"
     "go.mongodb.org/atlas/mongodbatlas"
-     "github.com/mwielbut/pointy"
+    "github.com/mwielbut/pointy"
     "fmt"
     "github.com/schollz/progressbar/v3"
     "mongoex/cmd/config"
@@ -24,6 +24,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
         return nil
     }
 
+    // key handler
     pubkey, privkey := config.ParseConfig()
     t := digest.NewTransport(pubkey, privkey)
     tc, err := t.Client()
@@ -32,6 +33,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 	return err
     }
 
+    // create new client
     client := mongodbatlas.NewClient(tc)
     sourceProject, _, err := client.Projects.GetOneProjectByName(context.Background(), sourceProjectName)
     targetProject, _, err := client.Projects.GetOneProjectByName(context.Background(), targetProjectName)
@@ -40,7 +42,33 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
             return err
     }
 
-    // check the snapshot policy
+    // checkpoints of database
+    // listoptions
+    /*
+    lo := &mongodbatlas.ListOptions{}
+    srcDbCheckPoints, _, err := client.Checkpoints.List(context.Background(), sourceProject.ID, sourceClusterName, lo)
+    fmt.Println("Checkpoints: ", srcDbCheckPoints)
+    */
+
+    // snapshot params for cloudbackup snapshots
+    /*
+    cbs := &mongodbatlas.SnapshotReqPathParameters{
+            GroupID:     sourceProject.ID,
+            ClusterName: sourceClusterName,
+    }
+
+    // begin list all snapshots
+    lo := &mongodbatlas.ListOptions{}
+
+    cloudBackupSnapshots, _, err := client.CloudProviderSnapshots.GetAllCloudProviderSnapshots(context.Background(), cbs, lo)
+    //fmt.Println("cloudbackup snapshots: ", cloudBackupSnapshots.Results)
+    for i := 0; i < len(cloudBackupSnapshots.Results); i++ {
+            fmt.Println(cloudBackupSnapshots.Results[i].ExpiresAt)
+    } 
+    // end of list all snapshiots
+    */
+
+    //, check the snapshot policy
     /* Still a WIP to find out the oldest snapshot we can retrieve from PIT
     snapshotPolicy, _, err := client.CloudProviderSnapshotBackupPolicies.Get(context.Background(), sourceProject.ID, sourceClusterName)
     if err != nil {
@@ -98,7 +126,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     }
 
     // for disk size measurement data points, it can return an array/slice and we need to pick
-    // the largest value in the slice
+    // the largest value (data size in cluster) in the slice
     var measurementVal float32
     measurementDataPoints := measurements.Measurements[0].DataPoints
     for j := 0; j < len(measurementDataPoints) ; j++ {
@@ -146,6 +174,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     }
 
     fmt.Println("Tier to be used (according to data size): ", tier)
+
     // create new cluster
     providerSettings := &mongodbatlas.ProviderSettings{
             //ProviderName: "TENANT", // BackingProviderName and ProviderName is only used for M0,M2,M5 - We need M10 and above
@@ -224,18 +253,18 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
             DeliveryType: "pointInTime",
     }
 
-    //restoreJob, _, err := client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
-    _, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
+    restoreJob, _, err := client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
+    //_, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
     if err != nil {
             panic(err)
     }
 
-    fmt.Println(fmt.Sprintf("Now doing Point-in-time-Recovery from EPOCH time: %d", pointInTimeSeconds))
+    fmt.Println(fmt.Sprintf("\nNow doing Point-in-time-Recovery from EPOCH time: %d", pointInTimeSeconds))
     //fmt.Println(fmt.Sprintf("Restore PIT Job ID: %d", restoreJob.ID))
-    fmt.Println("Please check MongoDB Atlas for progress")
+    //fmt.Println("Please check MongoDB Atlas for progress")
     // end of point in time restore code
 
-    /* Disabled until we figure out whether should be check it synchronously
+    // Checks the restoration progress
     p := &mongodbatlas.SnapshotReqPathParameters{
             GroupID:     sourceProject.ID,
             ClusterName: sourceClusterName,
@@ -257,13 +286,13 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
             // progressBar
             bar.Add(1)
 
-            if *gs.Failed == false {
-                    fmt.Println(fmt.Sprintf("Finished restoring to %s cluster on %s", clusterName, targetProject.ID))
+	    // once we finished, break the loop
+	    if gs.FinishedAt != "" {
+                    fmt.Println(fmt.Sprintf("\nFinished restoring to %s cluster on %s", targetClusterName, targetProjectName))
                     break
             }
             time.Sleep(15)
     }
-    */
     // end of cluster restore code
 
     return nil
