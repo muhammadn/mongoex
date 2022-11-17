@@ -33,6 +33,11 @@ func ParseConfig() (string, string) {
 		fmt.Printf("couldn't read config: %s", err)
 	}
 
-	mongoex := os.Getenv("ATLAS_ORG")
-	return p[mongoex].PublicKey,  p[mongoex].PrivateKey
+	atlasOrg := os.Getenv("ATLAS_ORG")
+        if atlasOrg == "" {
+                publicKey  := os.Getenv("ATLAS_PUBLICKEY")
+                privateKey := os.Getenv("ATLAS_PRIVATEKEY")
+                return publicKey, privateKey
+        }
+	return p[atlasOrg].PublicKey,  p[atlasOrg].PrivateKey
 }
