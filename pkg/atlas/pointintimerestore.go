@@ -6,7 +6,7 @@ import (
 
     "github.com/mongodb-forks/digest"
     "go.mongodb.org/atlas/mongodbatlas"
-    "github.com/mwielbut/pointy"
+     "github.com/mwielbut/pointy"
     "fmt"
     "github.com/schollz/progressbar/v3"
     "mongoex/cmd/config"
@@ -39,6 +39,28 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 	    fmt.Println(err)
             return err
     }
+
+    // check the snapshot policy
+    /* Still a WIP to find out the oldest snapshot we can retrieve from PIT
+    snapshotPolicy, _, err := client.CloudProviderSnapshotBackupPolicies.Get(context.Background(), sourceProject.ID, sourceClusterName)
+    if err != nil {
+            fmt.Println(err)
+	    return err
+    }
+
+    timeNowUnix     := time.Now().Unix()
+    secondsUnixDays := *snapshotPolicy.RestoreWindowDays * int64(86400)
+    backwardsTime   := timeNowUnix - secondsUnixDays // go back start of date earliest snapshot
+    //fmt.Println(fmt.Sprintf("timeNowUnix: %d, backwardsTime: %d, pointInTimeSeconds: %d", timeNowUnix, backwardsTime, pointInTimeSeconds))
+
+    if pointInTimeSeconds > backwardsTime && pointInTimeSeconds < timeNowUnix {
+            fmt.Println("\nSource Snapshot exists! ✅")
+    } else {
+	    err := errors.New("\nError! Snapshot for that time is not available")
+	    return err
+    }
+    */
+
     fmt.Println(fmt.Sprintf("Source Project Name: %s\nSource Project ID: %s\nSource ClusterName %s\n\nTarget Project Name: %s\nTarget Project ID: %s\nTarget ClusterName: %s\n", sourceProjectName, sourceProject.ID, sourceClusterName, targetProjectName, targetProject.ID, targetClusterName))
 
     // sc = source cluster
@@ -211,6 +233,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     fmt.Println(fmt.Sprintf("Now doing Point-in-time-Recovery from EPOCH time: %d", pointInTimeSeconds))
     //fmt.Println(fmt.Sprintf("Restore PIT Job ID: %d", restoreJob.ID))
     fmt.Println("Please check MongoDB Atlas for progress")
+    // end of point in time restore code
 
     /* Disabled until we figure out whether should be check it synchronously
     p := &mongodbatlas.SnapshotReqPathParameters{
