@@ -26,7 +26,7 @@ func ParseConfig() (string, string) {
 	v.AddConfigPath(homeDir + "/.mongoex/")
 
 	if err := v.ReadInConfig(); err != nil {
-		fmt.Printf("couldn't load config: %s\n", err)
+		fmt.Printf("\ncouldn't load config: %s\n", err)
                 fmt.Printf("We'll try to check ATLAS_PUBLICKEY and ATLAS_PRIVATEKEY env vars\n")
 	}
 	if err := v.Unmarshal(&p); err != nil {

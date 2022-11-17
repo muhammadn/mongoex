@@ -196,7 +196,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 		bar.Add(1)
 
 		if dc.StateName == "IDLE" {
-			fmt.Println("Cluster has been created!")
+			fmt.Println("\nCluster has been created!")
                         fmt.Println(fmt.Sprintf("Cluster Srv Connection: %s", dc.ConnectionStrings.StandardSrv))
                         fmt.Println(fmt.Sprintf("Cluster Standard Connection: %s", dc.ConnectionStrings.Standard))
                         if dc.ConnectionStrings.PrivateSrv != "" {
