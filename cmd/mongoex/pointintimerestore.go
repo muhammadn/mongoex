@@ -15,10 +15,10 @@ var pointInTimeCmd = &cobra.Command{
     //Args:  cobra.ExactArgs(1),
     RunE: func(cmd *cobra.Command, args []string) error {
         sourceProjectName, _               := cmd.Flags().GetString("sourceProject")
-	targetClusterName, _         := cmd.Flags().GetString("targetClusterName")
-	pointInTimeSeconds, _        := cmd.Flags().GetString("time")
-	sourceClusterName, _         := cmd.Flags().GetString("sourceClusterName")
-	targetProjectName, _           := cmd.Flags().GetString("targetProject")
+	targetClusterName, _               := cmd.Flags().GetString("targetClusterName")
+	pointInTimeSeconds, _              := cmd.Flags().GetString("time")
+	sourceClusterName, _               := cmd.Flags().GetString("sourceClusterName")
+	targetProjectName, _               := cmd.Flags().GetString("targetProject")
 
 	// convert diskSize from string to float which is required
         var timeSeconds int64
@@ -33,7 +33,7 @@ var pointInTimeCmd = &cobra.Command{
 }
 
 func init() {
-        tempClusterCmd.AddCommand(pointInTimeCmd)
+        atlasCmd.AddCommand(pointInTimeCmd)
         pointInTimeCmd.Flags().StringP("sourceProject", "", "", "Source MongoDB Project Name")
         pointInTimeCmd.Flags().StringP("targetClusterName", "", "", "Name for temporary cluster")
         pointInTimeCmd.Flags().StringP("sourceClusterName", "", "", "Source MongoDB Cluster Name")
