@@ -6,6 +6,7 @@ require (
 	github.com/mongodb-forks/digest v1.0.4
 	github.com/mwielbut/pointy v1.1.0
 	github.com/schollz/progressbar/v3 v3.11.0
+	github.com/slack-go/slack v0.11.4
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
 	go.mongodb.org/atlas v0.17.0
@@ -16,6 +17,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect

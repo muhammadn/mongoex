@@ -7,7 +7,7 @@ import (
         "github.com/spf13/viper"
 )
 
-func ParseConfig() (string, string) {
+func ParseConfig() (string, string, string) {
 	type Profile struct {
 	        PrivateKey string `mapstructure:"privateKey"`
 		PublicKey string `mapstructure:"publicKey"`
@@ -34,10 +34,16 @@ func ParseConfig() (string, string) {
 	}
 
 	atlasOrg := os.Getenv("ATLAS_ORG")
+        slackWebhookUrl := os.Getenv("SLACK_WEBHOOK_URL")
         if atlasOrg == "" {
                 publicKey  := os.Getenv("ATLAS_PUBLICKEY")
                 privateKey := os.Getenv("ATLAS_PRIVATEKEY")
-                return publicKey, privateKey
+                return publicKey, privateKey, slackWebhookUrl
         }
-	return p[atlasOrg].PublicKey,  p[atlasOrg].PrivateKey
+
+        if slackWebhookUrl == "" {
+            fmt.Println("Slack webhook not set, notifications disabled")
+        }
+        
+	return p[atlasOrg].PublicKey,  p[atlasOrg].PrivateKey, slackWebhookUrl
 }

@@ -10,6 +10,7 @@ import (
     "fmt"
     "github.com/schollz/progressbar/v3"
     "mongoex/cmd/config"
+    "mongoex/pkg/slack"
     "strings"
     "net/url"
     "strconv"
@@ -19,13 +20,13 @@ import (
 func PointInTimeRestore(sourceProjectName string, targetClusterName string, pointInTimeSeconds int64, sourceClusterName string, targetProjectName string) error {
     // Validate target cluster, prevent accidental override source cluser
     if targetClusterName == sourceClusterName && sourceProjectName == targetProjectName {
-	fmt.Println("Target cluster name cannot be identical to Source cluster name")
-	fmt.Println("Please double check in MongoDB Atlas")
-        return nil
+	err := errors.New("Target cluster name cannot be identical to Source cluster name\nPlease double check in MongoDB Atlas")
+        slack.Notification("Target cluster name cannot be identical to Source cluster name\nPlease double check in MongoDB Atlas")
+        return err
     }
 
     // key handler
-    pubkey, privkey := config.ParseConfig()
+    pubkey, privkey, _ := config.ParseConfig()
     t := digest.NewTransport(pubkey, privkey)
     tc, err := t.Client()
     if err != nil {
@@ -42,14 +43,6 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
             return err
     }
 
-    // checkpoints of database
-    // listoptions
-    /*
-    lo := &mongodbatlas.ListOptions{}
-    srcDbCheckPoints, _, err := client.Checkpoints.List(context.Background(), sourceProject.ID, sourceClusterName, lo)
-    fmt.Println("Checkpoints: ", srcDbCheckPoints)
-    */
-
     // snapshot params for cloudbackup snapshots
     /*
     cbs := &mongodbatlas.SnapshotReqPathParameters{
@@ -58,12 +51,12 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     }
 
     // begin list all snapshots
-    lo := &mongodbatlas.ListOptions{}
+    //lo := &mongodbatlas.ListOptions{}
 
     cloudBackupSnapshots, _, err := client.CloudProviderSnapshots.GetAllCloudProviderSnapshots(context.Background(), cbs, lo)
     //fmt.Println("cloudbackup snapshots: ", cloudBackupSnapshots.Results)
     for i := 0; i < len(cloudBackupSnapshots.Results); i++ {
-            fmt.Println(cloudBackupSnapshots.Results[i].ExpiresAt)
+            fmt.Println(cloudBackupSnapshots.Results[i])
     } 
     // end of list all snapshiots
     */
@@ -116,16 +109,17 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     // convert port to integer
     port, err := strconv.Atoi(hostnameAndPort[1])
     if err != nil {
+        slack.Notification(fmt.Sprintf("Error converting port number string to integer with error: %s", err))
         panic(err)
-    }
+    }	
 
     measurements, _, err := client.ProcessMeasurements.List(context.Background(), sourceProject.ID, hostname, port, mongoMeasurements)
     if measurements.Measurements == nil {
-            err = errors.New("There is no measurements to determine the datr size")
+            err = errors.New("There is no measurements to determine the data size")
 	    return err
     }
 
-    // for disk size measurement data points, it can return an array/slice and we need to pick
+    // for disk size measurement data points, it returns an array/slice and we need to pick
     // the largest value (data size in cluster) in the slice
     var measurementVal float32
     measurementDataPoints := measurements.Measurements[0].DataPoints
@@ -219,6 +213,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
                 dc, _, err := client.Clusters.Get(context.Background(), targetProject.ID, targetClusterName)
 		if err != nil {
 			fmt.Println(err)
+                        slack.Notification(fmt.Sprintf("\nProblem creating target cluster %s on project %s", targetClusterName, targetProjectName))
                         return err
 		}
 		// progressBar
@@ -228,12 +223,21 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 			fmt.Println("\nCluster has been created!")
                         fmt.Println(fmt.Sprintf("Cluster Srv Connection: %s", dc.ConnectionStrings.StandardSrv))
                         fmt.Println(fmt.Sprintf("Cluster Standard Connection: %s", dc.ConnectionStrings.Standard))
+
+                        slack.Notification(fmt.Sprintf("\nCluster %s has been created", targetClusterName))
+                        slack.Notification(fmt.Sprintf("\nCluster %s Srv Connection: %s", targetClusterName, dc.ConnectionStrings.StandardSrv))
+                        slack.Notification(fmt.Sprintf("\nCluster %s Standard Connection: %s", targetClusterName, dc.ConnectionStrings.Standard))
+
                         if dc.ConnectionStrings.PrivateSrv != "" {
                                 fmt.Println(fmt.Sprintf("Cluster Srv Private Connection: %s", dc.ConnectionStrings.PrivateSrv))
+                                slack.Notification(fmt.Sprintf("\nCluster %s Srv Private Connection: %s", targetClusterName, dc.ConnectionStrings.PrivateSrv))
 			}
 			if dc.ConnectionStrings.Private != "" {
                                 fmt.Println(fmt.Sprintf("Cluster Standard Private Connection: %s", dc.ConnectionStrings.Private))
+                                slack.Notification(fmt.Sprintf("\nCluster %s Standard Private Connection: %s", targetClusterName, dc.ConnectionStrings.Private))
 			}
+
+                        slack.Notification(fmt.Sprintf("Please wait while we do a Point-In-Time Restore to %s", targetClusterName))
 			break
 		}
 		time.Sleep(15)
@@ -250,12 +254,15 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
             TargetGroupID: targetProject.ID, // change this later to be specifiable to restore to another project
             TargetClusterName: targetClusterName, // target cluster is the one we're going to make
             PointInTimeUTCSeconds: pointInTimeSeconds, // UNIX epoch time in seconds
+            //OplogTs: pointInTimeSeconds, 
+            //OplogInc: 1,
             DeliveryType: "pointInTime",
     }
 
     restoreJob, _, err := client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
     //_, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
     if err != nil {
+            slack.Notification(fmt.Sprintf("\nProblem doing PIT restore to %s cluster on %s with error: %s", targetClusterName, targetProjectName, err))
             panic(err)
     }
 
@@ -289,6 +296,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 	    // once we finished, break the loop
 	    if gs.FinishedAt != "" {
                     fmt.Println(fmt.Sprintf("\nFinished restoring to %s cluster on %s", targetClusterName, targetProjectName))
+                    slack.Notification(fmt.Sprintf("\nFinished restoring from Project %s on cluster %s to Project %s on cluster %s", sourceProjectName, sourceClusterName, targetProjectName, targetClusterName))
                     break
             }
             time.Sleep(15)
