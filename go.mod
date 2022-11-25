@@ -9,7 +9,7 @@ require (
 	github.com/slack-go/slack v0.11.4
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
-	go.mongodb.org/atlas v0.17.0
+	go.mongodb.org/atlas v0.19.0
 	go.mongodb.org/mongo-driver v1.10.3
 )
 
@@ -26,7 +26,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
-	github.com/openlyinc/pointy v1.1.2 // indirect
+	github.com/openlyinc/pointy v1.2.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

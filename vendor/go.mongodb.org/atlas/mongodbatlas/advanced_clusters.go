@@ -43,25 +43,26 @@ var _ AdvancedClustersService = &AdvancedClustersServiceOp{}
 
 // AdvancedCluster represents MongoDB cluster.
 type AdvancedCluster struct {
-	BackupEnabled            *bool                      `json:"backupEnabled,omitempty"`
-	BiConnector              *BiConnector               `json:"biConnector,omitempty"`
-	ClusterType              string                     `json:"clusterType,omitempty"`
-	ConnectionStrings        *ConnectionStrings         `json:"connectionStrings,omitempty"`
-	DiskSizeGB               *float64                   `json:"diskSizeGB,omitempty"`
-	EncryptionAtRestProvider string                     `json:"encryptionAtRestProvider,omitempty"`
-	GroupID                  string                     `json:"groupId,omitempty"`
-	ID                       string                     `json:"id,omitempty"`
-	Labels                   []Label                    `json:"labels,omitempty"`
-	MongoDBMajorVersion      string                     `json:"mongoDBMajorVersion,omitempty"`
-	MongoDBVersion           string                     `json:"mongoDBVersion,omitempty"`
-	Name                     string                     `json:"name,omitempty"`
-	Paused                   *bool                      `json:"paused,omitempty"`
-	PitEnabled               *bool                      `json:"pitEnabled,omitempty"`
-	StateName                string                     `json:"stateName,omitempty"`
-	ReplicationSpecs         []*AdvancedReplicationSpec `json:"replicationSpecs,omitempty"`
-	CreateDate               string                     `json:"createDate,omitempty"`
-	RootCertType             string                     `json:"rootCertType,omitempty"`
-	VersionReleaseSystem     string                     `json:"versionReleaseSystem,omitempty"`
+	BackupEnabled                *bool                      `json:"backupEnabled,omitempty"`
+	BiConnector                  *BiConnector               `json:"biConnector,omitempty"`
+	ClusterType                  string                     `json:"clusterType,omitempty"`
+	ConnectionStrings            *ConnectionStrings         `json:"connectionStrings,omitempty"`
+	DiskSizeGB                   *float64                   `json:"diskSizeGB,omitempty"`
+	EncryptionAtRestProvider     string                     `json:"encryptionAtRestProvider,omitempty"`
+	GroupID                      string                     `json:"groupId,omitempty"`
+	ID                           string                     `json:"id,omitempty"`
+	Labels                       []Label                    `json:"labels,omitempty"`
+	MongoDBMajorVersion          string                     `json:"mongoDBMajorVersion,omitempty"`
+	MongoDBVersion               string                     `json:"mongoDBVersion,omitempty"`
+	Name                         string                     `json:"name,omitempty"`
+	Paused                       *bool                      `json:"paused,omitempty"`
+	PitEnabled                   *bool                      `json:"pitEnabled,omitempty"`
+	StateName                    string                     `json:"stateName,omitempty"`
+	ReplicationSpecs             []*AdvancedReplicationSpec `json:"replicationSpecs,omitempty"`
+	CreateDate                   string                     `json:"createDate,omitempty"`
+	RootCertType                 string                     `json:"rootCertType,omitempty"`
+	VersionReleaseSystem         string                     `json:"versionReleaseSystem,omitempty"`
+	TerminationProtectionEnabled *bool                      `json:"terminationProtectionEnabled,omitempty"`
 }
 
 type AdvancedReplicationSpec struct {
@@ -72,14 +73,15 @@ type AdvancedReplicationSpec struct {
 }
 
 type AdvancedRegionConfig struct {
-	AnalyticsSpecs      *Specs               `json:"analyticsSpecs,omitempty"`
-	ElectableSpecs      *Specs               `json:"electableSpecs,omitempty"`
-	ReadOnlySpecs       *Specs               `json:"readOnlySpecs,omitempty"`
-	AutoScaling         *AdvancedAutoScaling `json:"autoScaling,omitempty"`
-	BackingProviderName string               `json:"backingProviderName,omitempty"`
-	Priority            *int                 `json:"priority,omitempty"`
-	ProviderName        string               `json:"providerName,omitempty"`
-	RegionName          string               `json:"regionName,omitempty"`
+	AnalyticsAutoScaling *AdvancedAutoScaling `json:"analyticsAutoScaling,omitempty"`
+	AnalyticsSpecs       *Specs               `json:"analyticsSpecs,omitempty"`
+	ElectableSpecs       *Specs               `json:"electableSpecs,omitempty"`
+	ReadOnlySpecs        *Specs               `json:"readOnlySpecs,omitempty"`
+	AutoScaling          *AdvancedAutoScaling `json:"autoScaling,omitempty"`
+	BackingProviderName  string               `json:"backingProviderName,omitempty"`
+	Priority             *int                 `json:"priority,omitempty"`
+	ProviderName         string               `json:"providerName,omitempty"`
+	RegionName           string               `json:"regionName,omitempty"`
 }
 
 type AdvancedAutoScaling struct {

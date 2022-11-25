@@ -139,49 +139,52 @@ type ConnectionStrings struct {
 
 // Cluster represents MongoDB cluster.
 type Cluster struct {
-	AutoScaling              *AutoScaling             `json:"autoScaling,omitempty"`
-	BackupEnabled            *bool                    `json:"backupEnabled,omitempty"` // Deprecated: Use ProviderBackupEnabled instead
-	BiConnector              *BiConnector             `json:"biConnector,omitempty"`
-	ClusterType              string                   `json:"clusterType,omitempty"`
-	DiskSizeGB               *float64                 `json:"diskSizeGB,omitempty"`
-	EncryptionAtRestProvider string                   `json:"encryptionAtRestProvider,omitempty"`
-	Labels                   []Label                  `json:"labels,omitempty"`
-	ID                       string                   `json:"id,omitempty"`
-	GroupID                  string                   `json:"groupId,omitempty"`
-	MongoDBVersion           string                   `json:"mongoDBVersion,omitempty"`
-	MongoDBMajorVersion      string                   `json:"mongoDBMajorVersion,omitempty"`
-	MongoURI                 string                   `json:"mongoURI,omitempty"`
-	MongoURIUpdated          string                   `json:"mongoURIUpdated,omitempty"`
-	MongoURIWithOptions      string                   `json:"mongoURIWithOptions,omitempty"`
-	Name                     string                   `json:"name,omitempty"`
-	CreateDate               string                   `json:"createDate,omitempty"`
-	NumShards                *int64                   `json:"numShards,omitempty"`
-	Paused                   *bool                    `json:"paused,omitempty"`
-	PitEnabled               *bool                    `json:"pitEnabled,omitempty"`
-	ProviderBackupEnabled    *bool                    `json:"providerBackupEnabled,omitempty"`
-	ProviderSettings         *ProviderSettings        `json:"providerSettings,omitempty"`
-	ReplicationFactor        *int64                   `json:"replicationFactor,omitempty"`
-	ReplicationSpec          map[string]RegionsConfig `json:"replicationSpec,omitempty"`
-	ReplicationSpecs         []ReplicationSpec        `json:"replicationSpecs,omitempty"`
-	SrvAddress               string                   `json:"srvAddress,omitempty"`
-	StateName                string                   `json:"stateName,omitempty"`
-	ServerlessBackupOptions  *ServerlessBackupOptions `json:"serverlessBackupOptions,omitempty"`
-	ConnectionStrings        *ConnectionStrings       `json:"connectionStrings,omitempty"`
-	Links                    []*Link                  `json:"links,omitempty"`
-	VersionReleaseSystem     string                   `json:"versionReleaseSystem,omitempty"`
+	AutoScaling                  *AutoScaling             `json:"autoScaling,omitempty"`
+	BackupEnabled                *bool                    `json:"backupEnabled,omitempty"` // Deprecated: Use ProviderBackupEnabled instead
+	BiConnector                  *BiConnector             `json:"biConnector,omitempty"`
+	ClusterType                  string                   `json:"clusterType,omitempty"`
+	DiskSizeGB                   *float64                 `json:"diskSizeGB,omitempty"`
+	EncryptionAtRestProvider     string                   `json:"encryptionAtRestProvider,omitempty"`
+	Labels                       []Label                  `json:"labels,omitempty"`
+	ID                           string                   `json:"id,omitempty"`
+	GroupID                      string                   `json:"groupId,omitempty"`
+	MongoDBVersion               string                   `json:"mongoDBVersion,omitempty"`
+	MongoDBMajorVersion          string                   `json:"mongoDBMajorVersion,omitempty"`
+	MongoURI                     string                   `json:"mongoURI,omitempty"`
+	MongoURIUpdated              string                   `json:"mongoURIUpdated,omitempty"`
+	MongoURIWithOptions          string                   `json:"mongoURIWithOptions,omitempty"`
+	Name                         string                   `json:"name,omitempty"`
+	CreateDate                   string                   `json:"createDate,omitempty"`
+	NumShards                    *int64                   `json:"numShards,omitempty"`
+	Paused                       *bool                    `json:"paused,omitempty"`
+	PitEnabled                   *bool                    `json:"pitEnabled,omitempty"`
+	ProviderBackupEnabled        *bool                    `json:"providerBackupEnabled,omitempty"`
+	ProviderSettings             *ProviderSettings        `json:"providerSettings,omitempty"`
+	ReplicationFactor            *int64                   `json:"replicationFactor,omitempty"`
+	ReplicationSpec              map[string]RegionsConfig `json:"replicationSpec,omitempty"`
+	ReplicationSpecs             []ReplicationSpec        `json:"replicationSpecs,omitempty"`
+	SrvAddress                   string                   `json:"srvAddress,omitempty"`
+	StateName                    string                   `json:"stateName,omitempty"`
+	ServerlessBackupOptions      *ServerlessBackupOptions `json:"serverlessBackupOptions,omitempty"`
+	ConnectionStrings            *ConnectionStrings       `json:"connectionStrings,omitempty"`
+	Links                        []*Link                  `json:"links,omitempty"`
+	VersionReleaseSystem         string                   `json:"versionReleaseSystem,omitempty"`
+	RootCertType                 string                   `json:"rootCertType,omitempty"`
+	TerminationProtectionEnabled *bool                    `json:"terminationProtectionEnabled,omitempty"`
 }
 
 // ProcessArgs represents the advanced configuration options for the cluster.
 type ProcessArgs struct {
-	DefaultReadConcern               string `json:"defaultReadConcern,omitempty"`
-	DefaultWriteConcern              string `json:"defaultWriteConcern,omitempty"`
-	FailIndexKeyTooLong              *bool  `json:"failIndexKeyTooLong,omitempty"`
-	JavascriptEnabled                *bool  `json:"javascriptEnabled,omitempty"`
-	MinimumEnabledTLSProtocol        string `json:"minimumEnabledTlsProtocol,omitempty"`
-	NoTableScan                      *bool  `json:"noTableScan,omitempty"`
-	OplogSizeMB                      *int64 `json:"oplogSizeMB,omitempty"`
-	SampleSizeBIConnector            *int64 `json:"sampleSizeBIConnector,omitempty"`
-	SampleRefreshIntervalBIConnector *int64 `json:"sampleRefreshIntervalBIConnector,omitempty"`
+	DefaultReadConcern               string   `json:"defaultReadConcern,omitempty"`
+	DefaultWriteConcern              string   `json:"defaultWriteConcern,omitempty"`
+	MinimumEnabledTLSProtocol        string   `json:"minimumEnabledTlsProtocol,omitempty"`
+	FailIndexKeyTooLong              *bool    `json:"failIndexKeyTooLong,omitempty"`
+	JavascriptEnabled                *bool    `json:"javascriptEnabled,omitempty"`
+	NoTableScan                      *bool    `json:"noTableScan,omitempty"`
+	OplogSizeMB                      *int64   `json:"oplogSizeMB,omitempty"`
+	SampleSizeBIConnector            *int64   `json:"sampleSizeBIConnector,omitempty"`
+	SampleRefreshIntervalBIConnector *int64   `json:"sampleRefreshIntervalBIConnector,omitempty"`
+	OplogMinRetentionHours           *float64 `json:"oplogMinRetentionHours,omitempty"`
 }
 
 // ClusterStatus is the status of the operations on the cluster.
@@ -436,7 +439,7 @@ func (s *ClustersServiceOp) Delete(ctx context.Context, groupID, clusterName str
 
 // UpdateProcessArgs Modifies Advanced Configuration Options for One Cluster
 //
-// See more: https://docs.atlas.mongodb.com/reference/api/clusters-modify-advanced-configuration-options/
+// See more: https://www.mongodb.com/docs/atlas/reference/api-resources-spec/#operation/updateAdvancedConfigurationOptionsForOneCluster
 func (s *ClustersServiceOp) UpdateProcessArgs(ctx context.Context, groupID, clusterName string, updateRequest *ProcessArgs) (*ProcessArgs, *Response, error) {
 	if groupID == "" {
 		return nil, nil, NewArgError("groupId", "must be set")
@@ -464,7 +467,7 @@ func (s *ClustersServiceOp) UpdateProcessArgs(ctx context.Context, groupID, clus
 
 // GetProcessArgs gets the Advanced Configuration Options for One Cluster
 //
-// See more: https://docs.atlas.mongodb.com/reference/api/clusters-get-advanced-configuration-options/#get-advanced-configuration-options-for-one-cluster
+// See more: https://www.mongodb.com/docs/atlas/reference/api-resources-spec/#operation/returnOneAdvancedConfigurationOptionsForOneCluster
 func (s *ClustersServiceOp) GetProcessArgs(ctx context.Context, groupID, clusterName string) (*ProcessArgs, *Response, error) {
 	if groupID == "" {
 		return nil, nil, NewArgError("groupId", "must be set")

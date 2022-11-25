@@ -170,13 +170,13 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     fmt.Println("Tier to be used (according to data size): ", tier)
 
     // create new cluster
-    providerSettings := &mongodbatlas.ProviderSettings{
+    /* providerSettings := &mongodbatlas.ProviderSettings{
             //ProviderName: "TENANT", // BackingProviderName and ProviderName is only used for M0,M2,M5 - We need M10 and above
             //BackingProviderName: "AWS",
             ProviderName: "AWS",
             InstanceSizeName: tier,
             RegionName: "AP_SOUTHEAST_1",
-    }
+    } */
 
     regionsConfig := make(map[string]mongodbatlas.RegionsConfig)
     regionsConfig["AP_SOUTHEAST_1"] = mongodbatlas.RegionsConfig{ 
@@ -185,19 +185,36 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 	    ReadOnlyNodes: pointy.Int64(0),
     }
 
-    cluster := &mongodbatlas.Cluster{
+    specs := &mongodbatlas.Specs{
+            NodeCount: pointy.Int(3),
+            InstanceSize: tier,
+    }
+
+    regionConfigs := mongodbatlas.AdvancedRegionConfig{
+            ElectableSpecs: specs,
+            Priority: pointy.Int(7),
+            ProviderName: "AWS",
+            RegionName: "AP_SOUTHEAST_1",
+    }
+
+    advancedReplicationSpec := mongodbatlas.AdvancedReplicationSpec{
+            NumShards: 1,
+            RegionConfigs: []*mongodbatlas.AdvancedRegionConfig{&regionConfigs},
+    }
+
+    cluster := &mongodbatlas.AdvancedCluster{
 	    Name: targetClusterName,
 	    DiskSizeGB: sc.DiskSizeGB,
 	    ClusterType: "REPLICASET",
-	    ProviderBackupEnabled: pointy.Bool(false),
-	    ProviderSettings: providerSettings,
+	    BackupEnabled: pointy.Bool(false),
+	    //ProviderSettings: providerSettings,
 	    MongoDBMajorVersion: "4.4",
-	    NumShards: pointy.Int64(1),
-	    //ReplicationSpecs: replicationSpecs,
-	    ReplicationSpec: regionsConfig,
+	    //NumShards: pointy.Int64(1),
+	    //ReplicationSpec: regionsConfig,
+            ReplicationSpecs: []*mongodbatlas.AdvancedReplicationSpec{&advancedReplicationSpec},
     }
 
-    _, _, err = client.Clusters.Create(context.Background(), targetProject.ID, cluster)
+    _, _, err = client.AdvancedClusters.Create(context.Background(), targetProject.ID, cluster)
     slack.Notification(fmt.Sprintf("Creating target cluster %s on project %s", targetClusterName, targetProjectName), slackWebhookUrl)
     if err != nil {
             slack.Notification(fmt.Sprintf("\nProblem creating target cluster %s on project %s with error: %s", targetClusterName, targetProjectName, err), slackWebhookUrl)
@@ -212,7 +229,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 
     for {
                 // dc = destination cluster
-                dc, _, err := client.Clusters.Get(context.Background(), targetProject.ID, targetClusterName)
+                dc, _, err := client.AdvancedClusters.Get(context.Background(), targetProject.ID, targetClusterName)
 		if err != nil {
 			fmt.Println(err)
                         slack.Notification(fmt.Sprintf("\nProblem creating target cluster %s on project %s", targetClusterName, targetProjectName), slackWebhookUrl)
