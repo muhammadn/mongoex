@@ -216,6 +216,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
                         slack.Notification(fmt.Sprintf("\nProblem creating target cluster %s on project %s", targetClusterName, targetProjectName))
                         return err
 		}
+
 		// progressBar
 		bar.Add(1)
 
@@ -263,6 +264,15 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     //_, _, err = client.CloudProviderSnapshotRestoreJobs.Create(context.Background(), o, cloudProviderSnapshot)
     if err != nil {
             slack.Notification(fmt.Sprintf("\nProblem doing PIT restore to %s cluster on %s with error: %s", targetClusterName, targetProjectName, err))
+            slack.Notification(fmt.Sprintf("Deleting target cluster %s on project %s", targetClusterName, targetProjectName))
+
+            _, cerr := client.Clusters.Delete(context.Background(), targetProject.ID, targetClusterName)
+            if cerr != nil {
+                    fmt.Println(cerr)
+                    slack.Notification(fmt.Sprintf("Error deleting target cluster %s with error: %s", targetClusterName, cerr))
+                    return err
+            }
+
             panic(err)
     }
 
@@ -296,7 +306,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 	    // once we finished, break the loop
 	    if gs.FinishedAt != "" {
                     fmt.Println(fmt.Sprintf("\nFinished restoring to %s cluster on %s", targetClusterName, targetProjectName))
-                    slack.Notification(fmt.Sprintf("\nFinished restoring from Project %s on cluster %s to Project %s on cluster %s", sourceProjectName, sourceClusterName, targetProjectName, targetClusterName))
+                    slack.Notification(fmt.Sprintf("Finished restoring from *Project %s* on *cluster %s* to *Project %s* on *cluster %s*", sourceProjectName, sourceClusterName, targetProjectName, targetClusterName))
                     break
             }
             time.Sleep(15)

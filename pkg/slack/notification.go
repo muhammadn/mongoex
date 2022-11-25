@@ -11,23 +11,27 @@ import (
 
 func Notification(message string) error {
     _, _, slackWebhookUrl := config.ParseConfig()
+    // if slackwebhook is not defined, then exit
     if slackWebhookUrl == "" {
             return nil
     }
 
+    // slack attachment (can customise)
     attachment := slack.Attachment{
 	Fallback:      message,
 	AuthorName:    "mongobot",
-	AuthorIcon:    "https://avatars2.githubusercontent.com/u/652790",
 	Text:          message,
 	Footer:        "mongoex",
 	FooterIcon:    "https://platform.slack-edge.com/img/default_application_icon.png",
 	Ts:            json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
     }
+
+    // the message from attachment (above)
     msg := slack.WebhookMessage{
 	Attachments: []slack.Attachment{attachment},
     }
 
+    // send to slack
     err := slack.PostWebhook(slackWebhookUrl, &msg)
     if err != nil {
 	fmt.Println(err)
