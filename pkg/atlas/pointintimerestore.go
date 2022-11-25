@@ -92,7 +92,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     }
     fmt.Println(fmt.Sprintf("Source Cluster %s, Disk size: %.2fGB", sourceClusterName, *sc.DiskSizeGB))
 
-    srcMongoURI      := strings.Split(sc.MongoURI, ",")
+    srcMongoURI      := strings.Split(sc.ConnectionStrings.Standard, ",")
     firstMongoURI    := srcMongoURI[0] // get the first mongodb string
     finalMongoURI, _ := url.Parse(firstMongoURI)
     //fmt.Println("MongoURI: ", finalMongoURI.Host)
