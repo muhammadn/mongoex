@@ -1,7 +1,6 @@
 package slack
 
 import (
-        "mongoex/cmd/config"
         "fmt"
 	"github.com/slack-go/slack"
         "encoding/json"
@@ -9,9 +8,8 @@ import (
         "time"
 )
 
-func Notification(message string) error {
-    _, _, slackWebhookUrl := config.ParseConfig()
-    // if slackwebhook is not defined, then exit
+func Notification(message string, slackWebhookUrl string) error {
+    // if slackwebhook is not defined, then exit early
     if slackWebhookUrl == "" {
             return nil
     }
