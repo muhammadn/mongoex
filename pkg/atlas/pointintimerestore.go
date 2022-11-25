@@ -85,7 +85,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     fmt.Println(fmt.Sprintf("Source Project Name: %s\nSource Project ID: %s\nSource ClusterName %s\n\nTarget Project Name: %s\nTarget Project ID: %s\nTarget ClusterName: %s\n", sourceProjectName, sourceProject.ID, sourceClusterName, targetProjectName, targetProject.ID, targetClusterName))
 
     // sc = source cluster
-    sc, _, err := client.Clusters.Get(context.Background(), sourceProject.ID, sourceClusterName)
+    sc, _, err := client.AdvancedClusters.Get(context.Background(), sourceProject.ID, sourceClusterName)
     if err != nil {
                 fmt.Println(err)
                 return err
