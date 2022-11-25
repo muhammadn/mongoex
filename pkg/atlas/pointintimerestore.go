@@ -198,6 +198,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     }
 
     _, _, err = client.Clusters.Create(context.Background(), targetProject.ID, cluster)
+    slack.Notification(fmt.Sprintf("Creating target cluster %s on project %s", targetClusterName, targetProjectName), slackWebhookUrl)
     if err != nil {
             slack.Notification(fmt.Sprintf("\nProblem creating target cluster %s on project %s with error: %s", targetClusterName, targetProjectName, err), slackWebhookUrl)
             fmt.Println(err)
@@ -212,7 +213,6 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     for {
                 // dc = destination cluster
                 dc, _, err := client.Clusters.Get(context.Background(), targetProject.ID, targetClusterName)
-                slack.Notification(fmt.Sprintf("Creating target cluster %s on project %s", targetClusterName, targetProjectName), slackWebhookUrl)
 		if err != nil {
 			fmt.Println(err)
                         slack.Notification(fmt.Sprintf("\nProblem creating target cluster %s on project %s", targetClusterName, targetProjectName), slackWebhookUrl)
