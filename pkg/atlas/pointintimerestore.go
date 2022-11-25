@@ -87,6 +87,7 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     // sc = source cluster
     sc, _, err := client.AdvancedClusters.Get(context.Background(), sourceProject.ID, sourceClusterName)
     if err != nil {
+                slack.Notification(fmt.Sprintf("source cluster %s on project %s does not exist! stopping restore.", sourceClusterName, sourceProject.ID), slackWebhookUrl)
                 fmt.Println(err)
                 return err
     }
