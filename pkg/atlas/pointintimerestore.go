@@ -146,19 +146,19 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     var tier string
     switch true {
     // more than 128GB
-    case diskUsage > 137438953472:
+    case diskUsage <= 137438953472:
             tier = "M20"
             break
     // more than 256GB
-    case diskUsage > 274877906944:
+    case diskUsage <= 274877906944:
             tier = "M30"
             break
     // more than 512GB
-    case diskUsage > 549755813888:
+    case diskUsage <= 549755813888:
             tier = "M40"
             break
     // more than 1TB
-    case diskUsage > 1099511627776:
+    case diskUsage <= 1099511627776:
             tier = "M50"
             break
     // if not more than 128GB or not in sizes above
