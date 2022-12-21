@@ -123,42 +123,44 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
     // for disk size measurement data points, it returns an array/slice and we need to pick
     // the largest value (data size in cluster) in the slice
     var measurementVal float32
-    measurementDataPoints := measurements.Measurements[0].DataPoints
+    /* measurementDataPoints := measurements.Measurements[0].DataPoints
     for j := 0; j < len(measurementDataPoints) ; j++ {
 	k := j + 1 // forward lookup for k index
 
 	if k > 0 && k < len(measurementDataPoints) {
 	        currentDataPoint := *measurements.Measurements[0].DataPoints[j].Value // first ordered data in slice
 	        nextDataPoint    := *measurements.Measurements[0].DataPoints[k].Value // next data in slice
-		//fmt.Println("currentDataPoint: ", currentDataPoint)
-                //fmt.Println("nextDataPoint: ", nextDataPoint)
+		fmt.Println("currentDataPoint: ", currentDataPoint)
+                fmt.Println("nextDataPoint: ", nextDataPoint)
 	        if int64(nextDataPoint) >= int64(currentDataPoint) {
                         measurementVal = *measurements.Measurements[0].DataPoints[k].Value
-			//fmt.Println("measurementVal: ", measurementVal)
+		        //fmt.Println("measurementVal: ", measurementVal)
 	        }
         }
-    }
+    } */
+    measurementVal = *measurements.Measurements[0].DataPoints[0].Value
 
     // convert float exponent to integer
     diskUsage := int64(measurementVal)
+    //fmt.Println("diskUsage: ", diskUsage)
 
     // set which tiers to use
     var tier string
     switch true {
     // more than 128GB
-    case diskUsage <= 137438953472:
+    case diskUsage > 137438953472 && diskUsage < 274877906944:
             tier = "M20"
             break
     // more than 256GB
-    case diskUsage <= 274877906944:
+    case diskUsage > 274877906944 && diskUsage < 549755813888:
             tier = "M30"
             break
     // more than 512GB
-    case diskUsage <= 549755813888:
+    case diskUsage > 549755813888 && diskUsage < 1099511627776:
             tier = "M40"
             break
     // more than 1TB
-    case diskUsage <= 1099511627776:
+    case diskUsage > 1099511627776:
             tier = "M50"
             break
     // if not more than 128GB or not in sizes above
