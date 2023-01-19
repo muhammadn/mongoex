@@ -18,6 +18,15 @@ import (
 )
 
 func PointInTimeRestore(sourceProjectName string, targetClusterName string, pointInTimeSeconds int64, sourceClusterName string, targetProjectName string) error {
+    // check pointInTimeSeconds within 7 days ago
+    daysAgo := time.Now().AddDate(0, 0, -7).Unix()
+    
+    if pointInTimeSeconds < daysAgo {
+        err := errors.New("Point In Time recovery time range is not within the last 7 days! Please enter correct time")
+        slack.Notification("Point In Time recovery time range is not within the last 7 days! Please enter correct time", slackWebhookUrl)
+        return err
+    }
+
     // key handler
     pubkey, privkey, slackWebhookUrl := config.ParseConfig()
     t := digest.NewTransport(pubkey, privkey)
