@@ -29,10 +29,12 @@ func PointInTimeRestore(sourceProjectName string, targetClusterName string, poin
 
     // check pointInTimeSeconds within 7 days ago
     daysAgo := time.Now().AddDate(0, 0, -7).Unix()
+    timeNow := time.Now().Unix()
 
-    if pointInTimeSeconds < daysAgo {
-        err := errors.New("Point In Time recovery time range is not within the last 7 days! Please enter correct time")
-        slack.Notification("Point In Time recovery time range is not within the last 7 days! Please enter correct time", slackWebhookUrl)
+    if pointInTimeSeconds < daysAgo || pointInTimeSeconds > timeNow {
+        err := errors.New("Point In Time recovery EPOCH time is not within the last 7 days! Please enter correct time")
+        slack.Notification("Point In Time recovery EPOCH time is not within the last 7 days! Please enter correct time", slackWebhookUrl)
+        fmt.Println(err)
         return err
     }
 
